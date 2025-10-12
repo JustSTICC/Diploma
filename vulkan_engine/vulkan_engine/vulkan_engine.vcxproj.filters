@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{dcceef86-c7ed-425f-ba1e-b95d2718f948}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{ad03024c-ae30-453c-89cb-194de85a19a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="descriptors">
+      <UniqueIdentifier>{fb5f541d-0573-4595-8b08-f7f4fba99295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rendering">
+      <UniqueIdentifier>{0d465af7-93b6-4e65-94c6-bb14080a9701}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{ea41c500-3dfb-449e-b0ca-35d14ab65c90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\src">
+      <UniqueIdentifier>{a7d21a49-b236-4b3d-8fd4-c45299a5d1a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\inc">
+      <UniqueIdentifier>{1d37e669-b72b-4556-ad86-8a3dc89c2ced}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\src">
+      <UniqueIdentifier>{1f50d7e3-c919-425e-a6c4-08aa256d469c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\inc">
+      <UniqueIdentifier>{6ff1b3f5-1cc7-4001-befd-e996ce2b6b1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="descriptors\src">
+      <UniqueIdentifier>{5331dd63-e58e-4a06-adbb-be910a7c8316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="descriptors\inc">
+      <UniqueIdentifier>{eaf72d35-2e8c-4100-a690-65637836f700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui\src">
+      <UniqueIdentifier>{f893dd2e-c510-42b0-a5ba-70824a543430}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui\inc">
+      <UniqueIdentifier>{b23e6230-84ad-4987-a315-2b3a2abe481a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rendering\src">
+      <UniqueIdentifier>{6f51991b-1653-43ef-807d-59c27bac90d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rendering\inc">
+      <UniqueIdentifier>{8e78963a-4e51-4e94-b032-115db9ae84fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="resources\src">
+      <UniqueIdentifier>{7a02a8f8-b8a2-4daf-b5fc-1d075c159479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources\inc">
+      <UniqueIdentifier>{96b7516b-7983-409e-ac3e-abf097423661}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="config">
+      <UniqueIdentifier>{005b36ab-8d2d-4305-8c59-6d774f6c7e7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="validation">
+      <UniqueIdentifier>{b8bd1db9-d75b-47e2-8c55-ee1fc243baa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="validation\src">
+      <UniqueIdentifier>{eed7e141-2db7-4a95-b227-df6b785a9913}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="validation\inc">
+      <UniqueIdentifier>{e2f123fe-180b-48f8-9ee7-74b0fce318fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{8a71104b-718d-465f-b987-5985ca0d95a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="logger">
+      <UniqueIdentifier>{fecbcd97-4307-4878-a967-8965381f2087}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="vulkan_engine.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="core\VulkanApplication.cpp">
+      <Filter>core\src</Filter>
+    </ClCompile>
+    <ClCompile Include="core\VulkanDevice.cpp">
+      <Filter>core\src</Filter>
+    </ClCompile>
+    <ClCompile Include="core\VulkanInstance.cpp">
+      <Filter>core\src</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Vertex.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="descriptors\DescriptorManager.cpp">
+      <Filter>descriptors\src</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\GuiManager.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\CommandManager.cpp">
+      <Filter>rendering\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\VulkanGraphicsPipeline.cpp">
+      <Filter>rendering\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\VulkanSwapchain.cpp">
+      <Filter>rendering\src</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\BufferManager.cpp">
+      <Filter>resources\src</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\TextureManager.cpp">
+      <Filter>resources\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_draw.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_tables.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>ui\src</Filter>
+    </ClCompile>
+    <ClCompile Include="validation\VulkanValidator.cpp">
+      <Filter>validation\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>logger</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\VulkanInstance.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="core\VulkanApplication.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="core\VulkanDevice.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Vertex.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\VertexTypes.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="descriptors\DescriptorManager.h">
+      <Filter>descriptors\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\GuiManager.h">
+      <Filter>ui\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\VulkanSwapchain.h">
+      <Filter>rendering\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\VulkanGraphicsPipeline.h">
+      <Filter>rendering\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\CommandManager.h">
+      <Filter>rendering\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\TextureManager.h">
+      <Filter>resources\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\BufferManager.h">
+      <Filter>resources\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="validation\VulkanValidator.h">
+      <Filter>validation\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="FilePaths.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>logger</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\shaders\shader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\shader.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\shaders\compile.sh">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
