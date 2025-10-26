@@ -24,7 +24,7 @@
 
 #include "common/Vertex.h"
 #include "common/VertexTypes.h"
-#include "core/VulkanApplication.h"
+#include "core/VulkanEngine.h"
 #include "rendering/VulkanGraphicsPipeline.h"
 #include "rendering/CommandManager.h"
 #include "resources/BufferManager.h"
@@ -43,7 +43,7 @@ struct UniformBufferObject {
     glm::mat4 proj;
 };
 
-class MyVulkanApp : public VulkanApplication {
+class MyVulkanApp : public VulkanEngine {
 
 private:
     std::vector<StandardVertex> vertices_;
@@ -74,13 +74,13 @@ private:
     bool show_transform_window = true;
 
 public:
-    MyVulkanApp() : VulkanApplication({
-        .windowWidth = 1280,
-        .windowHeight = 800,
+    MyVulkanApp() : VulkanEngine({
+        .windowWidth = 1920,
+        .windowHeight = 1080,
         .windowTitle = "Vulkan Boilerplate with ImGui",
         .maxFramesInFlight = 2,
         .enableValidation = true,
-        .enableGui = true,
+        .enableGui = false,
         .fontPath = "../assets/fonts/Roboto-Regular.ttf",
         .fontSize = 16.0f
         }) {

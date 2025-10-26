@@ -1,47 +1,24 @@
-﻿  imgui_impl_glfw.cpp
-  imgui_impl_vulkan.cpp
-  imgui.cpp
-  imgui_draw.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  Vertex.cpp
-  GLM_GTX_hash requires C++11 standard library support
-  VulkanApplication.cpp
-D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(26,9): warning C4005: 'LOG_VK_SURFACE_EXTENT': macro redefinition
-  (compiling source file 'core/VulkanApplication.cpp')
-      D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(25,9):
-      see previous definition of 'LOG_VK_SURFACE_EXTENT'
-  
-  VulkanDevice.cpp
+﻿  VulkanDevice.cpp
 D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(26,9): warning C4005: 'LOG_VK_SURFACE_EXTENT': macro redefinition
   (compiling source file 'core/VulkanDevice.cpp')
       D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(25,9):
       see previous definition of 'LOG_VK_SURFACE_EXTENT'
   
-  VulkanInstance.cpp
+  VulkanEngine.cpp
 D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(26,9): warning C4005: 'LOG_VK_SURFACE_EXTENT': macro redefinition
-  (compiling source file 'core/VulkanInstance.cpp')
+  (compiling source file 'core/VulkanEngine.cpp')
       D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(25,9):
       see previous definition of 'LOG_VK_SURFACE_EXTENT'
   
   DescriptorManager.cpp
-  Logger.cpp
-D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(26,9): warning C4005: 'LOG_VK_SURFACE_EXTENT': macro redefinition
-  (compiling source file 'Logger.cpp')
-      D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(25,9):
-      see previous definition of 'LOG_VK_SURFACE_EXTENT'
-  
   CommandManager.cpp
   VulkanGraphicsPipeline.cpp
+  VulkanGraphicsPipelineV2.cpp
   VulkanSwapchain.cpp
   BufferManager.cpp
   TextureManager.cpp
-  Shader.cpp
   GuiManager.cpp
 D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\ui\GuiManager.cpp(77,59): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
-  VulkanValidator.cpp
-  Generating Code...
-  Compiling...
   vulkan_engine.cpp
   GLM_GTX_hash requires C++11 standard library support
 D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(26,9): warning C4005: 'LOG_VK_SURFACE_EXTENT': macro redefinition
@@ -50,5 +27,4 @@ D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\Logger.h(26,9): warning C4005:
       see previous definition of 'LOG_VK_SURFACE_EXTENT'
   
   Generating Code...
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vulkan_engine.vcxproj -> D:\tu\diploma\Diploma\vulkan_engine\vulkan_engine\x64\Debug\vulkan_engine.exe

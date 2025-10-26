@@ -32,6 +32,7 @@ class CommandManager {
         VkCommandPool commandPool = VK_NULL_HANDLE;
         std::vector<VkCommandBuffer> commandBuffers;
 
+        void BeginRendring(VkCommandBuffer commandBuffer);
         void createCommandPool();
         void createCommandBuffers(uint32_t maxFramesInFlight);
 };

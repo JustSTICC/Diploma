@@ -83,7 +83,7 @@
     <ClCompile Include="vulkan_engine.cpp">
       <Filter>main</Filter>
     </ClCompile>
-    <ClCompile Include="core\VulkanApplication.cpp">
+    <ClCompile Include="core\VulkanEngine.cpp">
       <Filter>core\src</Filter>
     </ClCompile>
     <ClCompile Include="core\VulkanDevice.cpp">
@@ -134,21 +134,30 @@
     <ClCompile Include="..\..\external\imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>ui\src</Filter>
     </ClCompile>
-    <ClCompile Include="validation\VulkanValidator.cpp">
-      <Filter>validation\src</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>common\src</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>logger</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanCleaner.cpp">
+      <Filter>core\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="validation\VulkanValidator.cpp">
+      <Filter>validation\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\VulkanGraphicsPipelineV2.cpp">
+      <Filter>rendering\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\VulkanInstance.h">
       <Filter>core\inc</Filter>
     </ClInclude>
-    <ClInclude Include="core\VulkanApplication.h">
+    <ClInclude Include="core\VulkanEngine.h">
       <Filter>core\inc</Filter>
     </ClInclude>
     <ClInclude Include="core\VulkanDevice.h">
@@ -195,6 +204,13 @@
     </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>logger</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCleaner.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="Frame.h" />
+    <ClInclude Include="rendering\VulkanGraphicsPipelineV2.h">
+      <Filter>rendering\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -9,7 +9,7 @@ struct Config {
     std::string windowTitle = "G.L. Engine";
     uint32_t maxFramesInFlight = 2;
     bool enableValidation = true;
-    bool enableGui = true;
+    bool enableGui = false;
     std::string fontPath = "";
     float fontSize = 16.0f;
 };
