@@ -9,3 +9,5 @@ vulkan_engine/x64/*
 *.idb
 *.recipe
 *.ilk
+/vulkan_engine/vulkan_engine/vulkan_engine/x64/Debug
+*.log
