@@ -2,3 +2,4 @@ external/*
 vulkan_engine/vulkan_engine/.vs/*
 vulkan_engine/vulkan_engine/x64/*
 vulkan_engine/x64/*
+*.obj
