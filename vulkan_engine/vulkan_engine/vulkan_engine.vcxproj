@@ -106,16 +106,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>VK_DEBUG;VK_LOG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VK_DEBUG;VK_LOG;GLM_FORCE_RADIANS;GLM_ENABLE_EXPERIMENTAL;GLFW_INCLUDE_VULKAN;TINYOBJLOADER_IMPLEMENTATION</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\external\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\..\external\stb;$(ProjectDir)..\..\external\imgui;$(ProjectDir)..\..\external\tinyobjloader;$(ProjectDir)..\..\external\vulkan\Include;$(ProjectDir)..\..\external\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tu\diploma\external\stb;D:\tu\diploma\external\imgui;D:\tu\diploma\external\tinyobjloader;D:\tu\diploma\external\vulkan\Include;D:\tu\diploma\external\glm;D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\external\glfw-3.3.8.bin.WIN64\lib-vc2022;$(ProjectDir)..\..\external\vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\lib-vc2022;D:\tu\diploma\external\vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,16 +124,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>VK_DEBUG;VK_LOG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VK_DEBUG;VK_LOG;GLM_FORCE_RADIANS;GLM_ENABLE_EXPERIMENTAL;GLFW_INCLUDE_VULKAN;TINYOBJLOADER_IMPLEMENTATION</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\external\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\..\external\stb;$(ProjectDir)..\..\external\imgui;$(ProjectDir)..\..\external\tinyobjloader;$(ProjectDir)..\..\external\vulkan\Include;$(ProjectDir)..\..\external\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tu\diploma\external\stb;D:\tu\diploma\external\imgui;D:\tu\diploma\external\tinyobjloader;D:\tu\diploma\external\vulkan\Include;D:\tu\diploma\external\glm;D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\external\glfw-3.3.8.bin.WIN64\lib-vc2022;$(ProjectDir)..\..\external\vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\lib-vc2022;D:\tu\diploma\external\vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -143,46 +143,42 @@
     <ClCompile Include="..\..\external\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="common\Vertex.cpp" />
-    <ClCompile Include="core\VulkanEngine.cpp" />
     <ClCompile Include="core\VulkanDevice.cpp" />
+    <ClCompile Include="core\VulkanEngine.cpp" />
     <ClCompile Include="core\VulkanInstance.cpp" />
     <ClCompile Include="descriptors\DescriptorManager.cpp" />
-    <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="rendering\CommandManager.cpp" />
     <ClCompile Include="rendering\VulkanGraphicsPipeline.cpp" />
-    <ClCompile Include="rendering\VulkanGraphicsPipelineV2.cpp" />
     <ClCompile Include="rendering\VulkanSwapchain.cpp" />
     <ClCompile Include="resources\BufferManager.cpp" />
     <ClCompile Include="resources\TextureManager.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ui\GuiManager.cpp" />
     <ClCompile Include="validation\VulkanValidator.cpp" />
-    <ClCompile Include="VulkanCleaner.cpp" />
-    <ClCompile Include="vulkan_engine.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="common\Vertex.h" />
     <ClInclude Include="common\VertexTypes.h" />
     <ClInclude Include="config.h" />
-    <ClInclude Include="core\VulkanEngine.h" />
     <ClInclude Include="core\VulkanDevice.h" />
+    <ClInclude Include="core\VulkanEngine.h" />
     <ClInclude Include="core\VulkanInstance.h" />
     <ClInclude Include="descriptors\DescriptorManager.h" />
     <ClInclude Include="FilePaths.h" />
-    <ClInclude Include="Frame.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="rendering\CommandManager.h" />
     <ClInclude Include="rendering\VulkanGraphicsPipeline.h" />
-    <ClInclude Include="rendering\VulkanGraphicsPipelineV2.h" />
     <ClInclude Include="rendering\VulkanSwapchain.h" />
     <ClInclude Include="resources\BufferManager.h" />
     <ClInclude Include="resources\TextureManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ui\GuiManager.h" />
     <ClInclude Include="validation\VulkanValidator.h" />
-    <ClInclude Include="VulkanCleaner.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\compile.sh" />

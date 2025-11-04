@@ -45,16 +45,16 @@ void VulkanEngine::initVulkan(){
     if(glfwCreateWindowSurface(vulkanInstance_->getInstance(), window_, nullptr, &surface_) != VK_SUCCESS) {
         throw std::runtime_error("failed to create window surface!");
     }
-    
-    VK_PUSH_INSTANCE_DELETER([this](VkInstance instance) {
-        vkDestroySurfaceKHR(instance, surface_, nullptr);
-        });
-    
+
     vulkanDevice_ = std::make_unique<VulkanDevice>();
     vulkanDevice_->initialize(*vulkanInstance_, surface_);
 
     vulkanSwapchain_ = std::make_unique<VulkanSwapchain>();
     vulkanSwapchain_->initialize(*vulkanDevice_, surface_, window_);
+
+    if (config_.maxFramesInFlight == NULL) {
+		config_.maxFramesInFlight = vulkanSwapchain_->getImages().size();
+    }
 
     vulkanPipeline_ = std::make_unique<VulkanGraphicsPipeline>();
     vulkanPipeline_->initialize(*vulkanDevice_, *vulkanSwapchain_);
@@ -161,12 +161,7 @@ void VulkanEngine::drawFrame() {
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     VkResult result = vkQueueSubmit(vulkanDevice_->getGraphicsQueue(), 1, &submitInfo, inFlightFences_[currentFrame_]);
-    if (result != VK_SUCCESS) {
-        std::cout << "failed to submit draw command buffer - " << result << std::endl;
-        throw std::runtime_error("failed to submit draw command buffer!");
-    }else{
-        // std::cout << "Successfully submmited command buffer - " << result << std::endl;
-    }
+	ASSERT_VK_RESULT(result, "failed to submit draw command buffer!");
 
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

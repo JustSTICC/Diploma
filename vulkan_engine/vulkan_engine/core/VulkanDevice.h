@@ -1,8 +1,9 @@
 #pragma once
 
+#include <vulkan/vulkan.hpp>
+#include <vector>
 #include <optional>
 #include <set>
-#include "../VulkanCleaner.h"
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
@@ -37,7 +38,6 @@ class VulkanDevice {
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) const;
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
-		bool isDynamicRenderingSupported() const{ return dynamicRenderingSupported; }
 
     private:
         const VulkanInstance* vulkanInstance = nullptr;
@@ -49,11 +49,10 @@ class VulkanDevice {
 
         const std::vector<const char*> deviceExtensions = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-			VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME,
             VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
             VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME
         };
-		bool dynamicRenderingSupported;
+
         void pickPhysicalDevice();
         void createLogicalDevice();
         bool isDeviceSuitable(VkPhysicalDevice device) const;

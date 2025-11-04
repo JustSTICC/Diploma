@@ -77,17 +77,13 @@ void VulkanDevice::createLogicalDevice(){
     }
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
-	deviceFeatures.geometryShader = VK_TRUE;
-	deviceFeatures.tessellationShader = VK_TRUE;
 	VkPhysicalDeviceShaderObjectFeaturesEXT shaderObjectFeatures{};
 	shaderObjectFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT;
-
-	VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeatures{
-	    .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-        .pNext = nullptr,
-        .dynamicRendering = VK_TRUE
-    };
-	shaderObjectFeatures.pNext = &dynamicRenderingFeatures;
+	VkPhysicalDeviceVulkan13Features vulkan13Features{};
+	vulkan13Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+	vulkan13Features.synchronization2 = VK_TRUE;
+	vulkan13Features.dynamicRendering = VK_TRUE;
+	shaderObjectFeatures.pNext = &vulkan13Features;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -97,8 +93,13 @@ void VulkanDevice::createLogicalDevice(){
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-    createInfo.enabledLayerCount = 0;
-	createInfo.ppEnabledLayerNames = nullptr;
+    if(vulkanInstance->isValidationEnabled()){
+        const auto& validationLayers = vulkanInstance->getValidationLayers();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
+    }else{
+        createInfo.enabledLayerCount = 0;
+    }
 	createInfo.pNext = &shaderObjectFeatures;
 
     VkResult result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
@@ -108,9 +109,7 @@ void VulkanDevice::createLogicalDevice(){
     }else{
         std::cout << "Successfully created logical device - " << result << std::endl;
     }
-    VK_PUSH_DEVICE_DELETER([this](VkDevice device) {
-            vkDestroyDevice(device, nullptr);
-		});
+
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
@@ -141,7 +140,7 @@ bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) const {
     for(const auto& extension: availableExtensions){
         requiredExtensions.erase(extension.extensionName);
     }
-    const_cast<VulkanDevice*>(this)->dynamicRenderingSupported = requiredExtensions.find(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME) == requiredExtensions.end();
+    
     return requiredExtensions.empty();
 }
 

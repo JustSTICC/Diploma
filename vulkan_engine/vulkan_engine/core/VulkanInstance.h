@@ -1,7 +1,9 @@
 #pragma once
 
+#include <vulkan/vulkan.hpp>
+#include <vector>
+#include <string>
 #include "../validation/VulkanValidator.h"
-#include "../VulkanCleaner.h"
 
 class VulkanInstance{
     public:

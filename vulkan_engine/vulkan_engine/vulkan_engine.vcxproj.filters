@@ -78,13 +78,13 @@
     <Filter Include="logger">
       <UniqueIdentifier>{fecbcd97-4307-4878-a967-8965381f2087}</UniqueIdentifier>
     </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{9f241e95-41c1-4571-8535-6a256b47456b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vulkan_engine.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="core\VulkanEngine.cpp">
-      <Filter>core\src</Filter>
     </ClCompile>
     <ClCompile Include="core\VulkanDevice.cpp">
       <Filter>core\src</Filter>
@@ -134,30 +134,24 @@
     <ClCompile Include="..\..\external\imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>ui\src</Filter>
     </ClCompile>
+    <ClCompile Include="validation\VulkanValidator.cpp">
+      <Filter>validation\src</Filter>
+    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>common\src</Filter>
     </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>logger</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanCleaner.cpp">
+    <ClCompile Include="core\VulkanEngine.cpp">
       <Filter>core\src</Filter>
     </ClCompile>
-    <ClCompile Include="Frame.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="validation\VulkanValidator.cpp">
-      <Filter>validation\src</Filter>
-    </ClCompile>
-    <ClCompile Include="rendering\VulkanGraphicsPipelineV2.cpp">
-      <Filter>rendering\src</Filter>
+    <ClCompile Include="Application.cpp">
+      <Filter>app</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\VulkanInstance.h">
-      <Filter>core\inc</Filter>
-    </ClInclude>
-    <ClInclude Include="core\VulkanEngine.h">
       <Filter>core\inc</Filter>
     </ClInclude>
     <ClInclude Include="core\VulkanDevice.h">
@@ -205,12 +199,11 @@
     <ClInclude Include="Logger.h">
       <Filter>logger</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanCleaner.h">
+    <ClInclude Include="core\VulkanEngine.h">
       <Filter>core\inc</Filter>
     </ClInclude>
-    <ClInclude Include="Frame.h" />
-    <ClInclude Include="rendering\VulkanGraphicsPipelineV2.h">
-      <Filter>rendering\inc</Filter>
+    <ClInclude Include="Application.h">
+      <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

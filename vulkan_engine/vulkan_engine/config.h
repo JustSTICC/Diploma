@@ -3,13 +3,16 @@
 #include <string>
 #include "Logger.h"
 
+#define MODEL_PATH "../assets/models/viking_room.obj"
+#define TEXTURE_PATH "../assets/textures/viking_room.png"
+
 struct Config {
-    uint32_t windowWidth = 800;
-    uint32_t windowHeight = 600;
+    uint32_t windowWidth = 1280;
+    uint32_t windowHeight = 800;
     std::string windowTitle = "G.L. Engine";
-    uint32_t maxFramesInFlight = 2;
+    uint32_t maxFramesInFlight = NULL;
     bool enableValidation = true;
     bool enableGui = false;
-    std::string fontPath = "";
+    std::string fontPath = "../assets/fonts/Roboto-Regular.ttf";
     float fontSize = 16.0f;
 };

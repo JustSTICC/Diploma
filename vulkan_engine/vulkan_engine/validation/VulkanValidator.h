@@ -3,6 +3,14 @@
 #include <vector>
 #include <string>
 #include <iostream>
+
+
+#define ASSERT_VK_RESULT(result, msg) \
+    if (result != VK_SUCCESS) { \
+        std::cerr << msg << " - Error Code: " << result << std::endl; \
+        throw std::runtime_error(msg); \
+    } \
+
 class VulkanValidator
 {
 public:

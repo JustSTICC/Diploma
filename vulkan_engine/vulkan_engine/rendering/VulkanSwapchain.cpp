@@ -32,7 +32,7 @@ void VulkanSwapchain::recreate(GLFWwindow* window){
 void VulkanSwapchain::createSwapChain(GLFWwindow* window){
     SwapChainSupportDetails swapChainSupport = vulkanDevice->querySwapChainSupport(vulkanDevice->getPhysicalDevice());
 
-    surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, window);
 
@@ -70,15 +70,7 @@ void VulkanSwapchain::createSwapChain(GLFWwindow* window){
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     VkResult result = vkCreateSwapchainKHR(vulkanDevice->getLogicalDevice(), &createInfo, nullptr, &swapChain);
-    if (result != VK_SUCCESS) {
-        std::cout<< "Failed to create swapchain - " << result << std::endl;
-        throw std::runtime_error("failed to create swap chain!");
-    }else{
-        std::cout<< "Swapchain created successfully" << std::endl;
-        VK_PUSH_DEVICE_DELETER([this](VkDevice device) {
-            vkDestroySwapchainKHR(device, swapChain, nullptr);
-			});
-    }
+	ASSERT_VK_RESULT(result, " Creating swapchain");
 
     vkGetSwapchainImagesKHR(vulkanDevice->getLogicalDevice(), swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
@@ -95,6 +87,10 @@ void VulkanSwapchain::createImageViews(){
         viewInfo.image = swapChainImages[i];
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         viewInfo.format = swapChainImageFormat;
+		viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;

@@ -116,7 +116,6 @@ void CommandManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
         //std::cout << "Successfully started recording command buffer - " << beginCommandBufferResult << std::endl;
     }
 
-    
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
@@ -132,7 +131,7 @@ void CommandManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-    //vkCmdBeginRendering(commandBuffer, );
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
     VkBuffer vertexBuffers[] = {vertexBuffer};
@@ -156,22 +155,4 @@ void CommandManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indexCount), 1, 0, 0, 0);
-}
-
-void CommandManager::BeginRendring(VkCommandBuffer commandBuffer) {
-	VkClearValue clearColor = { 
-        {{0.0f, 0.0f, 0.0f, 1.0f}} 
-    };
-
-	VkClearValue depthValue = {};
-    depthValue.depthStencil = { 1.0f, 0 };
-
-	VkRenderingAttachmentInfoKHR colorAttachment{};
-	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO_KHR;
-	colorAttachment.pNext = nullptr;
-    
-	std::array<VkClearValue, 2> clearValues = { clearColor, depthValue };
-	VkRenderingInfoKHR renderingInfo{};
-
-    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 }

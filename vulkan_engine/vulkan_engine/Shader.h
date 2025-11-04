@@ -1,6 +1,5 @@
 #pragma once
-#include "VulkanCleaner.h"
-#include <string>
+#include <vulkan/vulkan.hpp>
 
 class Shader
 {

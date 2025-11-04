@@ -5,43 +5,23 @@
 
 
 std::vector<VkShaderEXT> Shader::createShaderModule(VkDevice device) {
-    static PFN_vkCreateShadersEXT pfnCreateShadersEXT = nullptr;
-    static PFN_vkDestroyShaderEXT pfnDestroyShaderEXT = nullptr;
-
-    if (!pfnCreateShadersEXT) {
-        pfnCreateShadersEXT = reinterpret_cast<PFN_vkCreateShadersEXT>(vkGetDeviceProcAddr(device, "vkCreateShadersEXT"));
-        pfnDestroyShaderEXT = reinterpret_cast<PFN_vkDestroyShaderEXT>(vkGetDeviceProcAddr(device, "vkDestroyShaderEXT"));
-    }
-
-    if (!pfnCreateShadersEXT || !pfnDestroyShaderEXT) {
-        throw std::runtime_error("Required VK_EXT_shader_object functions not available. Ensure VK_EXT_shader_object is enabled on device and the driver supports it.");
-    }
 
     std::vector<VkShaderCreateInfoEXT> shaderInfo(2);
     shaderInfo[0] = createVertexShaderInfo();
     shaderInfo[1] = createFragmentShaderInfo();
 
     std::vector<VkShaderEXT> shaders(shaderInfo.size());
-    auto result = pfnCreateShadersEXT(device, shaderInfo.size(), shaderInfo.data(), nullptr, shaders.data());
+    //auto result = vkCreateShadersEXT(device, shaderInfo.size(), shaderInfo.data(), nullptr, shaders.data());
  
-    if (result == VK_SUCCESS) {
+   /* if (result == VK_SUCCESS) {
         std::cout << "Shader modules created successfully - " << result << std::endl;
-		VkShaderEXT vertex = shaders[0];
-        VK_PUSH_DEVICE_DELETER([vertex](VkDevice device) {
-            auto pfn = reinterpret_cast<PFN_vkDestroyShaderEXT>(vkGetDeviceProcAddr(device, "vkDestroyShaderEXT"));
-            if (pfn) pfn(device, vertex, nullptr);
-			});
-		VkShaderEXT fragment = shaders[1];
-        VK_PUSH_DEVICE_DELETER([fragment](VkDevice device) {
-            auto pfn = reinterpret_cast<PFN_vkDestroyShaderEXT>(vkGetDeviceProcAddr(device, "vkDestroyShaderEXT"));
-            if (pfn) pfn(device, fragment, nullptr);
-			});
+
         return shaders;
     }
     else {
         std::cerr << "Failed to create shader modules - " << result << std::endl;
         throw std::runtime_error("failed to create shader modules!");
-    }
+    }*/
     return shaders;
 }
 

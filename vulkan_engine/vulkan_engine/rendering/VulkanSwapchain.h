@@ -1,24 +1,26 @@
 #pragma once
 
-#include "../VulkanCleaner.h"
+#include <vulkan/vulkan.h>
+#include <vector>
 #include <GLFW/glfw3.h>
 #include "../core/VulkanDevice.h"
+#include "../validation/VulkanValidator.h"
 
-class VulkanSwapchain {
-public:
-    VulkanSwapchain();
-    ~VulkanSwapchain();
+class VulkanSwapchain{
+    public:
+        VulkanSwapchain();
+        ~VulkanSwapchain();
 
-    void initialize(const VulkanDevice& device, VkSurfaceKHR surface, GLFWwindow* window);
-    void cleanup();
-    void recreate(GLFWwindow* window);
+        void initialize(const VulkanDevice& device, VkSurfaceKHR surface, GLFWwindow* window);
+        void cleanup();
+        void recreate(GLFWwindow* window);
 
-    VkSwapchainKHR getSwapChain() const { return swapChain; }
-    const std::vector<VkImage>& getImages() const { return swapChainImages; }
-    VkFormat getImageFormat() const { return swapChainImageFormat; }
-    VkExtent2D getExtent() const { return swapChainExtent; }
-    const std::vector<VkImageView>& getImageViews() const { return swapChainImageViews; }
-    VkFormat getSurfaceFormat() const { return surfaceFormat.format; }
+        VkSwapchainKHR getSwapChain() const { return swapChain; }
+        const std::vector<VkImage>& getImages() const { return swapChainImages; }
+        VkFormat getImageFormat() const { return swapChainImageFormat; }
+        VkExtent2D getExtent() const { return swapChainExtent; }
+        const std::vector<VkImageView>& getImageViews() const { return swapChainImageViews; }
+
     private:
         const VulkanDevice* vulkanDevice = nullptr;
         VkSurfaceKHR surface = VK_NULL_HANDLE;
@@ -28,7 +30,7 @@ public:
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
         std::vector<VkImageView> swapChainImageViews;
-		VkSurfaceFormatKHR surfaceFormat;
+
         void createSwapChain(GLFWwindow* window);
         void createImageViews();
         void cleanupSwapChain();
