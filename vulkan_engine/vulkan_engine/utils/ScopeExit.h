@@ -1,0 +1,39 @@
+#pragma once
+// based on CppCon 2015: Andrei Alexandrescu "Declarative Control Flow"
+
+#ifndef LDR_ANONYMOUS_VARIABLE
+# define LDR_CONCATENATE_IMPL(s1, s2) s1##s2
+# define LDR_CONCATENATE(s1, s2) LDR_CONCATENATE_IMPL(s1, s2)
+# ifdef __COUNTER__
+#  define LDR_ANONYMOUS_VARIABLE(str) LDR_CONCATENATE(str, __COUNTER__)
+# else
+#  define LDR_ANONYMOUS_VARIABLE(str) LDR_CONCATENATE(str, __LINE__)
+# endif
+#endif
+
+namespace {
+
+	enum class ScopeGuardOnExit {};
+
+	template <typename T> class ScopeGuard
+	{
+	public:
+		explicit ScopeGuard(T&& fn)
+			: fn_(std::move(fn))
+		{
+		}
+		~ScopeGuard() { fn_(); }
+
+	private:
+		T fn_;
+	};
+
+	template<typename T>
+	ScopeGuard<T> operator+(ScopeGuardOnExit, T&& fn) {
+		return ScopeGuard<T>(std::forward<T>(fn));
+	}
+
+} // namespace
+
+#define SCOPE_EXIT \
+  auto LDR_ANONYMOUS_VARIABLE(SCOPE_EXIT_STATE) = ScopeGuardOnExit() + [&]() noexcept

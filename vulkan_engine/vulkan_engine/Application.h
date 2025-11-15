@@ -63,13 +63,14 @@ private:
     bool show_transform_window = true;
 
 public:
-    Application(Config config) : VulkanEngine(config) {}
+    Application(const Config& config) : VulkanEngine(config) {}
 protected:
     void renderGui() override;
     void initializeResources() override;
     void updateUniforms(uint32_t currentImage) override;
     void recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) override;
     void onCleanup() override;
+	void draw() override;
 private:
     void loadModel();
     void createFramebuffers();

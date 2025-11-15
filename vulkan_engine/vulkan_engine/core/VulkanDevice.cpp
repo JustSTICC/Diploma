@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <set>
+#include "../utils/Utils.h"
 #include "../Logger.h"
 
 VulkanDevice::VulkanDevice(){
@@ -13,23 +14,23 @@ VulkanDevice::~VulkanDevice(){
 }
 
 void VulkanDevice::initialize(const VulkanInstance& instance, VkSurfaceKHR surface){
-    this->vulkanInstance = &instance;
-    this->surface = surface;
+    this->vulkanInstance_ = &instance;
+    this->surface_ = surface;
 
     pickPhysicalDevice();
     createLogicalDevice();
 }
 
 void VulkanDevice::cleanup(){
-    if (device != VK_NULL_HANDLE){
-        vkDestroyDevice(device, nullptr);
-        device = VK_NULL_HANDLE;
+    if (device_ != VK_NULL_HANDLE){
+        vkDestroyDevice(device_, nullptr);
+        device_ = VK_NULL_HANDLE;
     }
 }
 
 void VulkanDevice::pickPhysicalDevice(){
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(vulkanInstance->getInstance(), &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(vulkanInstance_->getInstance(), &deviceCount, nullptr);
 
     if(deviceCount == 0){
         std::cerr << "failed to find physical device" << std::endl;
@@ -39,20 +40,20 @@ void VulkanDevice::pickPhysicalDevice(){
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(vulkanInstance->getInstance(), &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(vulkanInstance_->getInstance(), &deviceCount, devices.data());
     for(const auto& device: devices){
         if(isDeviceSuitable(device)){
             LOG_VK_PHYSICAL_DEVICE(device);
-            physicalDevice = device;
+            physicalDevice_ = device;
             break;
         }
     }
 
-    if(physicalDevice == VK_NULL_HANDLE){
+    if(physicalDevice_ == VK_NULL_HANDLE){
         std::cerr << "failed to find suitable GPU" << std::endl;
         throw std::runtime_error("failed to find suitable GPU");
     }else{
-        std::cout << "Suitable gpu found - " << physicalDevice << std::endl;
+        std::cout << "Suitable gpu found - " << physicalDevice_ << std::endl;
 #ifdef VK_LOG
         logPhysicalDeviceProperties();
 #endif // VK_LOG
@@ -61,7 +62,7 @@ void VulkanDevice::pickPhysicalDevice(){
 }
 
 void VulkanDevice::createLogicalDevice(){
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice_);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -91,10 +92,10 @@ void VulkanDevice::createLogicalDevice(){
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pEnabledFeatures = &deviceFeatures;
 
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-    createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-    if(vulkanInstance->isValidationEnabled()){
-        const auto& validationLayers = vulkanInstance->getValidationLayers();
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions_.size());
+    createInfo.ppEnabledExtensionNames = deviceExtensions_.data();
+    if(vulkanInstance_->isValidationEnabled()){
+        const auto& validationLayers = vulkanInstance_->getValidationLayers();
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
     }else{
@@ -102,7 +103,7 @@ void VulkanDevice::createLogicalDevice(){
     }
 	createInfo.pNext = &shaderObjectFeatures;
 
-    VkResult result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
+    VkResult result = vkCreateDevice(physicalDevice_, &createInfo, nullptr, &device_);
     if( result != VK_SUCCESS){
         std::cout << "Failed to create logical device - " << result << std::endl;
         throw std::runtime_error("Failed to create logical device");
@@ -110,11 +111,11 @@ void VulkanDevice::createLogicalDevice(){
         std::cout << "Successfully created logical device - " << result << std::endl;
     }
 
-    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
-    vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(device_, indices.graphicsFamily.value(), 0, &graphicsQueue_);
+    vkGetDeviceQueue(device_, indices.presentFamily.value(), 0, &presentQueue_);
 }
 
-bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
+bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) {
     
     QueueFamilyIndices indices = findQueueFamilies(device);
     bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -128,14 +129,14 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) const {
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) const {
+bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device){
     uint32_t extensionCount = 0;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
     LOG_VK_EXTENSIONS(availableExtensions);
 
-    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+    std::set<std::string> requiredExtensions(deviceExtensions_.begin(), deviceExtensions_.end());
 
     for(const auto& extension: availableExtensions){
         requiredExtensions.erase(extension.extensionName);
@@ -144,7 +145,7 @@ bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) const {
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const {
+QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) const{
     QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;
@@ -156,7 +157,7 @@ QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) cons
     LOG_VK_QUEUE_FAMILIES(queueFamilies);
     for(int i=0 ; i<queueFamilies.size(); i++){
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface_, &presentSupport);
         if (presentSupport) {
             indices.presentFamily = i;
         }
@@ -173,31 +174,47 @@ QueueFamilyIndices VulkanDevice::findQueueFamilies(VkPhysicalDevice device) cons
     return indices;
 }
 
-SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice device) const {
+SwapChainSupportDetails VulkanDevice::querySwapChainSupport(VkPhysicalDevice device) const{
+    /*const VkFormat depthFormats[] = {
+    VK_FORMAT_D32_SFLOAT_S8_UINT,
+    VK_FORMAT_D24_UNORM_S8_UINT,
+    VK_FORMAT_D16_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT,
+    VK_FORMAT_D16_UNORM };
+    for (const auto& depthFormat : depthFormats) {
+        VkFormatProperties formatProps;
+        vkGetPhysicalDeviceFormatProperties(device, depthFormat, &formatProps);
+        if (formatProps.optimalTilingFeatures) {
+            deviceDepthFormats_.push_back(depthFormat);
+        }
+    }
+    if (surface_ == VK_NULL_HANDLE) {
+        return ;
+    }*/
+
     SwapChainSupportDetails details;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface_, &details.capabilities);
 
     uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface_, &formatCount, nullptr);
     if(formatCount !=0 ){
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface_, &formatCount, details.formats.data());
     }
 
     uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface_, &presentModeCount, nullptr);
     if(presentModeCount != 0){
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface_, &presentModeCount, details.presentModes.data());
     }
 
     return details;
 }
 
-uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
+uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &memProperties);
 
     for(uint32_t i = 0; i < memProperties.memoryTypeCount; i++){
         if((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties){
@@ -208,10 +225,29 @@ uint32_t VulkanDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags
     throw std::runtime_error("Failed to find suitable memory type!");
 }
 
+VkFormat VulkanDevice::getClosestDepthStencilFormat(Format_e desiredFormat){
+    const std::vector<VkFormat> compatibleDepthStencilFormatList = getCompatibleDepthStencilFormats(desiredFormat);
+
+    // check if any of the format in compatible list is supported
+    for (VkFormat format : compatibleDepthStencilFormatList) {
+        if (std::find(deviceDepthFormats_.cbegin(), deviceDepthFormats_.cend(), format) != deviceDepthFormats_.cend()) {
+            return format;
+        }
+    }
+
+    // no matching found, choose the first supported format
+    return !deviceDepthFormats_.empty() ? deviceDepthFormats_[0] : VK_FORMAT_D24_UNORM_S8_UINT;
+    };
+
+uint32_t VulkanDevice::getFramebufferMSAABitMask() const {
+    const VkPhysicalDeviceLimits& limits = getPhysicalDeviceProperties().limits;
+    return limits.framebufferColorSampleCounts & limits.framebufferDepthSampleCounts;
+}
+
 #ifdef VK_LOG
-    void VulkanDevice::logPhysicalDeviceProperties() const {
+    void VulkanDevice::logPhysicalDeviceProperties() {
         VkPhysicalDeviceProperties deviceProperties;
-        vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+        vkGetPhysicalDeviceProperties(physicalDevice_, &deviceProperties);
         std::cout << "Device Name: " << deviceProperties.deviceName << std::endl;
         std::cout << "API Version: " 
                   << VK_VERSION_MAJOR(deviceProperties.apiVersion) << "."

@@ -29,5 +29,6 @@ class VulkanInstance{
 
         void createInstance();
         std::vector<const char*> getRequiredExtensions();
+
 };
 

@@ -15,4 +15,5 @@ struct Config {
     bool enableGui = false;
     std::string fontPath = "../assets/fonts/Roboto-Regular.ttf";
     float fontSize = 16.0f;
+    uint64_t maxStagingBufferSize = 128ull * 1024ull * 1024ull;
 };

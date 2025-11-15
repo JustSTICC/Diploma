@@ -1,7 +1,12 @@
 #include "Application.h"
 
 
+
+
 int main() {
+
+
+
     try {
 		Config config;
         Application app = Application(config);

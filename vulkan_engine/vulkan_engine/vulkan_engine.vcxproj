@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -108,13 +108,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>VK_DEBUG;VK_LOG;GLM_FORCE_RADIANS;GLM_ENABLE_EXPERIMENTAL;GLFW_INCLUDE_VULKAN;TINYOBJLOADER_IMPLEMENTATION</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\tu\diploma\external\stb;D:\tu\diploma\external\imgui;D:\tu\diploma\external\tinyobjloader;D:\tu\diploma\external\vulkan\Include;D:\tu\diploma\external\glm;D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tu\diploma\external\SPIRV-Reflect\include;D:\tu\diploma\external\stb;D:\tu\diploma\external\imgui;D:\tu\diploma\external\tinyobjloader;D:\tu\diploma\external\vulkan\Include;D:\tu\diploma\external\glm;D:\tu\diploma\external\glslang;D:\tu\diploma\external\taskflow-3.10.0;D:\tu\diploma\external\KTX-Software\lib\include;D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;volk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\lib-vc2022;D:\tu\diploma\external\vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -126,13 +126,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>VK_DEBUG;VK_LOG;GLM_FORCE_RADIANS;GLM_ENABLE_EXPERIMENTAL;GLFW_INCLUDE_VULKAN;TINYOBJLOADER_IMPLEMENTATION</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\tu\diploma\external\stb;D:\tu\diploma\external\imgui;D:\tu\diploma\external\tinyobjloader;D:\tu\diploma\external\vulkan\Include;D:\tu\diploma\external\glm;D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tu\diploma\external\SPIRV-Reflect\include;D:\tu\diploma\external\stb;D:\tu\diploma\external\imgui;D:\tu\diploma\external\tinyobjloader;D:\tu\diploma\external\vulkan\Include;D:\tu\diploma\external\glm;D:\tu\diploma\external\glslang;D:\tu\diploma\external\taskflow-3.10.0;D:\tu\diploma\external\KTX-Software\lib\include;D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;glslang.lib;glslang-default-resource-limits.lib;volk.lib;SPIRV-Tools.lib;SPIRV-Tools-opt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\tu\diploma\external\glfw-3.3.8.bin.WIN64\lib-vc2022;D:\tu\diploma\external\vulkan\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -144,27 +144,53 @@
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="common\ObjectManager.cpp" />
     <ClCompile Include="common\Vertex.cpp" />
+    <ClCompile Include="common\VertexInput.cpp" />
+    <ClCompile Include="core\IVkEngine.cpp" />
     <ClCompile Include="core\VulkanDevice.cpp" />
     <ClCompile Include="core\VulkanEngine.cpp" />
     <ClCompile Include="core\VulkanInstance.cpp" />
     <ClCompile Include="descriptors\DescriptorManager.cpp" />
     <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="rendering\CommandBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="rendering\CommandManager.cpp" />
+    <ClCompile Include="rendering\PipelineBuilder.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="rendering\VulkanGraphicsPipeline.cpp" />
+    <ClCompile Include="rendering\VulkanGraphicsPipelineV2.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="rendering\VulkanSwapchain.cpp" />
     <ClCompile Include="resources\BufferManager.cpp" />
+    <ClCompile Include="resources\StagingDevice.cpp" />
     <ClCompile Include="resources\TextureManager.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ui\GuiManager.cpp" />
+    <ClCompile Include="utils\SyncUtils.cpp" />
+    <ClCompile Include="utils\Utils.cpp" />
     <ClCompile Include="validation\VulkanValidator.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="CommandBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="common\Handle.h" />
+    <ClInclude Include="common\ObjectManager.h" />
+    <ClInclude Include="common\pipeline_defs.h" />
+    <ClInclude Include="common\render_def.h" />
+    <ClInclude Include="common\render_e.h" />
     <ClInclude Include="common\Vertex.h" />
     <ClInclude Include="common\VertexTypes.h" />
+    <ClInclude Include="common\VertexInput.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="core\ICommandBuffer.h" />
+    <ClInclude Include="core\IVkEngine.h" />
     <ClInclude Include="core\VulkanDevice.h" />
     <ClInclude Include="core\VulkanEngine.h" />
     <ClInclude Include="core\VulkanInstance.h" />
@@ -172,12 +198,22 @@
     <ClInclude Include="FilePaths.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="rendering\CommandManager.h" />
+    <ClInclude Include="rendering\PipelineBuilder.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="rendering\VulkanGraphicsPipeline.h" />
+    <ClInclude Include="rendering\VulkanGraphicsPipelineV2.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="rendering\VulkanSwapchain.h" />
     <ClInclude Include="resources\BufferManager.h" />
+    <ClInclude Include="resources\StagingDevice.h" />
     <ClInclude Include="resources\TextureManager.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ui\GuiManager.h" />
+    <ClInclude Include="utils\ScopeExit.h" />
+    <ClInclude Include="utils\SyncUtils.h" />
+    <ClInclude Include="utils\Utils.h" />
     <ClInclude Include="validation\VulkanValidator.h" />
   </ItemGroup>
   <ItemGroup>

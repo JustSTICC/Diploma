@@ -61,10 +61,17 @@ void VulkanValidator::setUtilMessenger(VkInstanceCreateInfo* createInfo) {
 void VulkanValidator::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | 
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |  
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
+                                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | 
+                             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
+    createInfo.pUserData = &this->debugCreateInfo;
 }
+
 
 VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -72,7 +79,15 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* pUserData)
 {
-    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+    if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        std::cout << "[ERROR] -> " << pCallbackData->pMessage << std::endl;
+    }
+    else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+        std::cout << "[WARNING] -> " << pCallbackData->pMessage << std::endl;
+    }
+    else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+        std::cout << "[INFO] -> " << pCallbackData->pMessage << std::endl;
+    }
     return VK_FALSE;
 }
 
@@ -99,5 +114,27 @@ void DestroyDebugUtilsMessengerEXT(VkInstance* instance,
         func(*instance, debugMessenger, pAllocator);
     }
 }
+
+VkResult setDebugObjectName(VkDevice device, VkObjectType type, uint64_t handle, const char* name) {
+    if (!name || !*name) return VK_SUCCESS;
+    const VkDebugUtilsObjectNameInfoEXT nameInfo = {
+      .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+      .objectType = type,
+      .objectHandle = handle,
+      .pObjectName = name,
+    };
+    return vkSetDebugUtilsObjectNameEXT(device, &nameInfo);
+}
+
+bool Assert(bool cond, const char* file, int line, const char* format, ...) {
+    if (!cond) {
+        va_list ap;
+        printf("[ERROR] Assertion failed in %s:%d: ", file, line);
+        printf("\n");
+        assert(false);
+    }
+    return cond;
+}
+
 
 

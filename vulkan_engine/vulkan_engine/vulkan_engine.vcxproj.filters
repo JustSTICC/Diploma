@@ -81,6 +81,15 @@
     <Filter Include="app">
       <UniqueIdentifier>{9f241e95-41c1-4571-8535-6a256b47456b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{97e39a45-7d7a-4201-b94a-392b0cb58668}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\src">
+      <UniqueIdentifier>{efc311c2-938b-47ed-bd78-7b90e1534676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\inc">
+      <UniqueIdentifier>{0442cf9a-f1ad-4d9e-aac8-d2dc8e8fce8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -149,6 +158,33 @@
     <ClCompile Include="Application.cpp">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="utils\SyncUtils.cpp">
+      <Filter>utils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\Utils.cpp">
+      <Filter>utils\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\VulkanGraphicsPipelineV2.cpp">
+      <Filter>rendering\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\PipelineBuilder.cpp">
+      <Filter>rendering\src</Filter>
+    </ClCompile>
+    <ClCompile Include="common\VertexInput.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="common\ObjectManager.cpp">
+      <Filter>common\src</Filter>
+    </ClCompile>
+    <ClCompile Include="core\IVkEngine.cpp">
+      <Filter>core\src</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\StagingDevice.cpp">
+      <Filter>resources\src</Filter>
+    </ClCompile>
+    <ClCompile Include="rendering\CommandBuffer.cpp">
+      <Filter>core\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\VulkanInstance.h">
@@ -204,6 +240,51 @@
     </ClInclude>
     <ClInclude Include="Application.h">
       <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\Utils.h">
+      <Filter>utils\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\SyncUtils.h">
+      <Filter>utils\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\ScopeExit.h">
+      <Filter>utils\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\VulkanGraphicsPipelineV2.h">
+      <Filter>rendering\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="rendering\PipelineBuilder.h">
+      <Filter>rendering\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\VertexInput.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="core\IVkEngine.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="core\ICommandBuffer.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\pipeline_defs.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\render_def.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Handle.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\render_e.h">
+      <Filter>common\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\StagingDevice.h">
+      <Filter>resources\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandBuffer.h">
+      <Filter>core\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="common\ObjectManager.h">
+      <Filter>common\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

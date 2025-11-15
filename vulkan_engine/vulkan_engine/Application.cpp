@@ -53,7 +53,7 @@ void Application::renderGui() {
 }
 
 void Application::initializeResources() {
-    textureManager_->createDepthResources(vulkanSwapchain_->getExtent(), depthImage_, depthImageMemory_, depthImageView_);
+   /* textureManager_->createDepthResources(vulkanSwapchain_->getExtent(), depthImage_, depthImageMemory_, depthImageView_);
     createFramebuffers();
     textureManager_->createTextureFromFile(TEXTURE_PATH, textureImage_, textureImageMemory_, textureImageView_);
     textureSampler_ = textureManager_->createTextureSampler();
@@ -70,7 +70,7 @@ void Application::initializeResources() {
         uniformBuffers_,
         textureImageView_,
         textureSampler_,
-        descriptorSets_);
+        descriptorSets_);*/
 }
 
 void Application::updateUniforms(uint32_t currentImage){
@@ -93,7 +93,7 @@ void Application::updateUniforms(uint32_t currentImage){
 
 void Application::recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
     commandManager_->resetCommandBuffer(currentFrame_);
-    commandManager_->recordCommandBuffer(
+    /*commandManager_->recordCommandBuffer(
         commandBuffer,
         imageIndex,
         vulkanPipeline_->getRenderPass(),
@@ -106,11 +106,11 @@ void Application::recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t i
         descriptorSets_,
         currentFrame_,
         static_cast<uint32_t>(indices_.size())
-    );
+    );*/
 
     // Render GUI if enabled (still within the render pass)
     if (config_.enableGui && guiManager_) {
-        guiManager_->render(commandBuffer, vulkanPipeline_->getGraphicsPipeline());
+        //guiManager_->render(commandBuffer, vulkanPipeline_->getGraphicsPipeline());
     }
 
     // End render pass and command buffer
@@ -123,7 +123,7 @@ void Application::recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t i
 }
 
 void Application::onCleanup() {
-    textureManager_->destroyImageView(depthImageView_);
+    /*textureManager_->destroyImageView(depthImageView_);
     textureManager_->destroyImage(depthImage_, depthImageMemory_);
 
     for (auto framebuffer : swapChainFramebuffers_) {
@@ -140,7 +140,7 @@ void Application::onCleanup() {
         bufferManager_->destroyBuffer(uniformBuffers_[i], uniformBuffersMemory_[i]);
     }
 
-    descriptorManager_->destroyDescriptorPool();
+    descriptorManager_->destroyDescriptorPool();*/
 }
 
 void Application::loadModel() {
@@ -194,7 +194,7 @@ void Application::createFramebuffers() {
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = vulkanPipeline_->getRenderPass();
+        //framebufferInfo.renderPass = vulkanPipeline_->getRenderPass();
         framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = vulkanSwapchain_->getExtent().width;
@@ -210,5 +210,9 @@ void Application::createFramebuffers() {
             std::cout << "successfully created framebuffer - " << i << " - " << result << std::endl;
         }
     }
+}
+
+void Application::draw() {
+
 }
 

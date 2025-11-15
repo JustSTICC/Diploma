@@ -1,11 +1,12 @@
 #include "VulkanSwapchain.h"
+#include "../core/VulkanDevice.h"
+#include "../utils/SyncUtils.h"
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
 #include <limits>
 
-VulkanSwapchain::VulkanSwapchain(){
-}
+VulkanSwapchain::VulkanSwapchain(){}
 
 VulkanSwapchain::~VulkanSwapchain(){
     cleanup();
@@ -29,12 +30,48 @@ void VulkanSwapchain::recreate(GLFWwindow* window){
     createImageViews();
 }
 
+Result VulkanSwapchain::present(VkSemaphore waitSemaphore) {
+
+    const VkSwapchainPresentFenceInfoEXT fenceInfo = {
+        .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_EXT,
+        .swapchainCount = 1,
+        .pFences = &presentFence_[currentImageIndex_],
+    };
+    const VkPresentInfoKHR pi = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext =  nullptr,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &waitSemaphore,
+        .swapchainCount = 1u,
+        .pSwapchains = &swapchain_,
+        .pImageIndices = &currentImageIndex_,
+    };
+    /*if (eng_.has_EXT_swapchain_maintenance1_) {
+        if (!presentFence_[currentImageIndex_]) {
+            presentFence_[currentImageIndex_] = createFence(vulkanDevice->getLogicalDevice(), "Fence: present-fence");
+        }
+    }*/
+    VkResult r = vkQueuePresentKHR(graphicsQueue_, &pi);
+    if (r != VK_SUCCESS && r != VK_SUBOPTIMAL_KHR && r != VK_ERROR_OUT_OF_DATE_KHR) {
+        VK_ASSERT(r);
+    }
+
+    // Ready to call acquireNextImage() on the next getCurrentVulkanTexture();
+    getNextImage_ = true;
+    currentFrameIndex_++;
+
+    return Result();
+}
+
+
 void VulkanSwapchain::createSwapChain(GLFWwindow* window){
     SwapChainSupportDetails swapChainSupport = vulkanDevice->querySwapChainSupport(vulkanDevice->getPhysicalDevice());
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, window);
+    VkImageUsageFlags usageFlags= chooseImageUsageFlags(swapChainSupport);
+
 
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
     if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
@@ -49,7 +86,7 @@ void VulkanSwapchain::createSwapChain(GLFWwindow* window){
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
     createInfo.imageExtent = extent;
     createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    createInfo.imageUsage = usageFlags;
 
     QueueFamilyIndices indices = vulkanDevice->findQueueFamilies(vulkanDevice->getPhysicalDevice());
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -157,4 +194,21 @@ VkExtent2D VulkanSwapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 
         return actualExtent;
     }
+}
+
+VkImageUsageFlags VulkanSwapchain::chooseImageUsageFlags(const SwapChainSupportDetails details) {
+    VkImageUsageFlags usageFlags =
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+        VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+        VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+
+    const bool isStorageSupported =
+        (details.capabilities.supportedUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT) > 0;
+
+    const bool isTilingOptimalSupported =
+        (details.props.optimalTilingFeatures & VK_IMAGE_USAGE_STORAGE_BIT) > 0;
+    if (isStorageSupported && isTilingOptimalSupported) {
+        usageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
+    }
+    return usageFlags;
 }

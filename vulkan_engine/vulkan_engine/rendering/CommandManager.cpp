@@ -3,26 +3,30 @@
 #include <iostream>
 #include <stdexcept>
 #include <array>
+#include "../utils/SyncUtils.h"
+#include "../utils/Utils.h"
+#include "../validation/VulkanValidator.h"
 
-CommandManager::CommandManager(){
-}
 
 CommandManager::~CommandManager(){
     cleanup();
 }
 
-void CommandManager::initialize(const VulkanDevice& device, uint32_t maxFramesInFlight){
-    this->vulkanDevice = &device;
+void CommandManager::initialize(const VulkanDevice& device){
+    vulkanDevice = &device;
 
     createCommandPool();
-    createCommandBuffers(maxFramesInFlight);
+    createCommandBuffers();
+
 }
 
 void CommandManager::cleanup(){
-    if(vulkanDevice && commandPool != VK_NULL_HANDLE){
-        vkDestroyCommandPool(vulkanDevice->getLogicalDevice(), commandPool, nullptr);
-        commandPool = VK_NULL_HANDLE;
+    waitAll();
+    for (CommandBufferWrapper& buf : buffers_) {
+        vkDestroyFence(vulkanDevice->getLogicalDevice(), buf.fence_, nullptr);
+        vkDestroySemaphore(vulkanDevice->getLogicalDevice(), buf.semaphore_, nullptr);
     }
+    vkDestroyCommandPool(vulkanDevice->getLogicalDevice(), commandPool_, nullptr);
 }
 
 void CommandManager::createCommandPool(){
@@ -33,38 +37,131 @@ void CommandManager::createCommandPool(){
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    VkResult result = vkCreateCommandPool(vulkanDevice->getLogicalDevice(), &poolInfo, nullptr, &commandPool);
-    if (result != VK_SUCCESS) {
-        std::cout<< "failed to create command pool - " << result <<std::endl;
-        throw std::runtime_error("failed to create command pool!");
-    }else{
-        std::cout<< "Successfully created command pool - " << result <<std::endl;
+    ASSERT_VK_RESULT(vkCreateCommandPool(vulkanDevice->getLogicalDevice(), &poolInfo, nullptr, &commandPool_), "Creating CommandPool");
+
+}
+
+void CommandManager::createCommandBuffers(){
+    const VkCommandBufferAllocateInfo alloacateInfo = {
+     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+     .commandPool = commandPool_,
+     .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+     .commandBufferCount = 1
+    };
+    for (uint32_t i = 0; i != kMaxCommandBuffers; i++) {
+        CommandBufferWrapper& buffer = buffers_[i];
+        char fenceName[256] = { 0 };
+        char semaphoreName[256] = { 0 };
+        
+        buffer.semaphore_ = createSemaphore(vulkanDevice->getLogicalDevice(), semaphoreName);
+        buffer.fence_ = createFence(vulkanDevice->getLogicalDevice(), fenceName);
+        vkAllocateCommandBuffers(vulkanDevice->getLogicalDevice(), &alloacateInfo, &buffer.cmdBufAllocated_);
+        buffers_[i].handle_.bufferIndex_ = i;
     }
 }
 
-void CommandManager::createCommandBuffers(uint32_t maxFramesInFlight){
-    commandBuffers.resize(maxFramesInFlight);
-
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
-
-    VkResult result = vkAllocateCommandBuffers(vulkanDevice->getLogicalDevice(), &allocInfo, commandBuffers.data());
-    if (result != VK_SUCCESS) {
-        std::cout<< "failed to create command buffer - " << result <<std::endl;
-        throw std::runtime_error("failed to allocate command buffers!");
-    }else{
-        std::cout<< "successfully created command buffer - " << result <<std::endl;
+const CommandBufferWrapper& CommandManager::acquire() {
+    while (!numAvailableCommandBuffers_) {
+        purge();
     }
+
+    CommandBufferWrapper* current = nullptr;
+    for (CommandBufferWrapper& buf : buffers_) {
+        if (buf.cmdBuf_ == VK_NULL_HANDLE) {
+            current = &buf;
+            break;
+        }
+    }
+    current->handle_.submitId_ = submitCounter_;
+    numAvailableCommandBuffers_--;
+    current->cmdBuf_ = current->cmdBufAllocated_;
+    current->isEncoding_ = true;
+
+    const VkCommandBufferBeginInfo bi = {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+    ASSERT_VK_RESULT(vkBeginCommandBuffer(current->cmdBuf_, &bi), "Begin CommandBuffer recording ");
+    nextSubmitHandle_ = current->handle_;
+    return *current;
+}
+
+void CommandManager::purge() {
+    const uint32_t numBuffers = VK_UTILS_GET_ARRAY_SIZE(buffers_);
+    for (uint32_t i = 0; i != numBuffers; i++) {
+        const uint32_t index = i + lastSubmitHandle_.bufferIndex_ + 1;
+        CommandBufferWrapper& buf = buffers_[index % numBuffers];
+        if (buf.cmdBuf_ == VK_NULL_HANDLE || buf.isEncoding_)
+            continue;
+        const VkResult result = vkWaitForFences(vulkanDevice->getLogicalDevice(), 1, &buf.fence_, VK_TRUE, 0);
+        if (result == VK_SUCCESS) {
+            vkResetCommandBuffer(
+                buf.cmdBuf_, VkCommandBufferResetFlags{ 0 });
+            vkResetFences(vulkanDevice->getLogicalDevice(), 1, &buf.fence_);
+            buf.cmdBuf_ = VK_NULL_HANDLE;
+            numAvailableCommandBuffers_++;
+        }
+        else {
+            if (result != VK_TIMEOUT) {
+               ASSERT_VK_RESULT(result, "Fence timeour");
+            }
+        }
+    }
+}
+
+SubmitHandle CommandManager::submit(const CommandBufferWrapper& wrapper) {
+    vkEndCommandBuffer(wrapper.cmdBuf_);
+    VkSemaphoreSubmitInfo waitSemaphores[] = { {}, {} };
+    uint32_t numWaitSemaphores = 0;
+    if (waitSemaphore_.semaphore) {
+        waitSemaphores[numWaitSemaphores++] = waitSemaphore_;
+    }
+    if (lastSubmitSemaphore_.semaphore) {
+        waitSemaphores[numWaitSemaphores++] = lastSubmitSemaphore_;
+    }
+    VkSemaphoreSubmitInfo signalSemaphores[] = {
+    VkSemaphoreSubmitInfo{
+     .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+     .semaphore = wrapper.semaphore_,
+     .stageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT},
+     {},
+    };
+    uint32_t numSignalSemaphores = 1;
+    if (signalSemaphore_.semaphore) {
+        signalSemaphores[numSignalSemaphores++] = signalSemaphore_;
+    }
+    const VkCommandBufferSubmitInfo submitInfo = {
+   .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+   .commandBuffer = wrapper.cmdBuf_,
+    };
+    const VkSubmitInfo2 si = {
+      .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+      .waitSemaphoreInfoCount = numWaitSemaphores,
+      .pWaitSemaphoreInfos = waitSemaphores,
+      .commandBufferInfoCount = 1u,
+      .pCommandBufferInfos = &submitInfo,
+      .signalSemaphoreInfoCount = numSignalSemaphores,
+      .pSignalSemaphoreInfos = signalSemaphores,
+    };
+    vkQueueSubmit2(vulkanDevice->getGraphicsQueue(), 1u, &si, wrapper.fence_);
+    lastSubmitSemaphore_.semaphore = wrapper.semaphore_;
+    lastSubmitHandle_ = wrapper.handle_;
+
+    waitSemaphore_.semaphore = VK_NULL_HANDLE;
+    signalSemaphore_.semaphore = VK_NULL_HANDLE;
+    const_cast<CommandBufferWrapper&>(wrapper).isEncoding_ = false;
+    submitCounter_++;
+    if (!submitCounter_) {
+        submitCounter_++;
+    }
+    return lastSubmitHandle_;
 }
 
 VkCommandBuffer CommandManager::beginSingleTimeCommands() {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = commandPool_;
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -79,6 +176,75 @@ VkCommandBuffer CommandManager::beginSingleTimeCommands() {
     return commandBuffer;
 }
 
+bool CommandManager::isReady(const SubmitHandle handle) const {
+    if (handle.empty()) {
+        return true;
+    }
+    const CommandBufferWrapper& buffers = buffers_[handle.bufferIndex_];
+    if (buffers.cmdBuf_ == VK_NULL_HANDLE) {
+        return true;
+    }
+    if (buffers.handle_.submitId_ != handle.submitId_) {
+        return true;
+    }
+    return vkWaitForFences(vulkanDevice->getLogicalDevice(), 1, &buffers.fence_, VK_TRUE, 0) == VK_SUCCESS;
+}
+
+void CommandManager::wait(const SubmitHandle handle) {
+    if (handle.empty()) {
+        vkDeviceWaitIdle(vulkanDevice->getLogicalDevice());
+        return;
+    }
+    if (isReady(handle)) return;
+    if (buffers_[handle.bufferIndex_].isEncoding_) {
+        return;
+    }
+    ASSERT_VK_RESULT(vkWaitForFences(vulkanDevice->getLogicalDevice(), 1, &buffers_[handle.bufferIndex_].fence_, VK_TRUE, UINT64_MAX), "Fence timeout");
+    purge();
+}
+
+void CommandManager::waitAll() {
+    VkFence fences[kMaxCommandBuffers];
+    uint32_t numFences = 0;
+    for (const CommandBufferWrapper& buf : buffers_) {
+        if (buf.cmdBuf_ != VK_NULL_HANDLE && !buf.isEncoding_) {
+            fences[numFences++] = buf.fence_;
+        }
+    }
+    if (numFences) {
+        ASSERT_VK_RESULT(vkWaitForFences(vulkanDevice->getLogicalDevice(), numFences, fences, VK_TRUE, UINT64_MAX),"Fence timeout");
+    }
+    purge();
+}
+
+void CommandManager::signalSemaphore(VkSemaphore semaphore, uint64_t signalValue) {
+    VK_ASSERT(signalSemaphore_.semaphore == VK_NULL_HANDLE);
+
+    signalSemaphore_.semaphore = semaphore;
+    signalSemaphore_.value = signalValue;
+}
+
+void CommandManager::waitSemaphore(VkSemaphore semaphore) {
+    if (waitSemaphore_.semaphore == VK_NULL_HANDLE) {
+        waitSemaphore_.semaphore = semaphore;
+    }
+    else {
+        std::cout << "Waiting for semaphore" << std::endl;
+    }
+}
+
+VkSemaphore CommandManager::acquireLastSubmitSemaphore() {
+    return std::exchange(lastSubmitSemaphore_.semaphore, VK_NULL_HANDLE);
+}
+
+SubmitHandle CommandManager::getLastSubmitHandle() const {
+    return lastSubmitHandle_;
+}
+
+SubmitHandle CommandManager::getNextSubmitHandle() const {
+    return nextSubmitHandle_;
+}
+
 void CommandManager::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkEndCommandBuffer(commandBuffer);
 
@@ -90,11 +256,11 @@ void CommandManager::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
     vkQueueSubmit(vulkanDevice->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(vulkanDevice->getGraphicsQueue());
 
-    vkFreeCommandBuffers(vulkanDevice->getLogicalDevice(), commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(vulkanDevice->getLogicalDevice(), commandPool_, 1, &commandBuffer);
 }
 
 void CommandManager::resetCommandBuffer(uint32_t frameIndex) {
-    vkResetCommandBuffer(commandBuffers[frameIndex], 0);
+    vkResetCommandBuffer(buffers_[frameIndex].cmdBufAllocated_, 0);
 }
 
 void CommandManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, 
