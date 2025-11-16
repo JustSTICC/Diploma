@@ -60,6 +60,64 @@ enum IndexFormat_e : uint8_t {
     IndexFormat_UI32,
 };
 
+enum class VertexFormat_e {
+    Invalid = 0,
+
+    Float1,
+    Float2,
+    Float3,
+    Float4,
+
+    Byte1,
+    Byte2,
+    Byte3,
+    Byte4,
+
+    UByte1,
+    UByte2,
+    UByte3,
+    UByte4,
+
+    Short1,
+    Short2,
+    Short3,
+    Short4,
+
+    UShort1,
+    UShort2,
+    UShort3,
+    UShort4,
+
+    Byte2Norm,
+    Byte4Norm,
+
+    UByte2Norm,
+    UByte4Norm,
+
+    Short2Norm,
+    Short4Norm,
+
+    UShort2Norm,
+    UShort4Norm,
+
+    Int1,
+    Int2,
+    Int3,
+    Int4,
+
+    UInt1,
+    UInt2,
+    UInt3,
+    UInt4,
+
+    HalfFloat1,
+    HalfFloat2,
+    HalfFloat3,
+    HalfFloat4,
+
+    Int_2_10_10_10_REV,
+};
+
 enum Format_e : uint8_t {
     Format_Invalid = 0,
 

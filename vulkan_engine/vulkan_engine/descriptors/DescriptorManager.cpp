@@ -19,6 +19,10 @@ DescriptorManager::~DescriptorManager() {
     cleanup();
 }
 
+void DescriptorManager::initialize(uint32_t maxTextures, uint32_t maxSamplers) {
+    growDescriptorPool(maxTextures, maxSamplers);
+}
+
 void DescriptorManager::cleanup() {
     if (descriptorSetLayout_ != VK_NULL_HANDLE) {
         eng_.vulkanDevice_.get()->getLogicalDevice();  // cleanup logic if needed

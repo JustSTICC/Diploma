@@ -23,6 +23,9 @@ class TextureManager{
         void createTextureView(const TextureViewDesc& desc,
             const char* debugName,
 			Result* outResult);
+
+        const void* loadFromFile(const char* imagePath);
+		void releseImgData();
         /*void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, 
                     VkImageUsageFlags usage, VkMemoryPropertyFlags properties, 
                     VkImage& image, VkDeviceMemory& imageMemory);*/
@@ -34,8 +37,8 @@ class TextureManager{
         //void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
         //void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
-        void createTextureFromFile(const std::string& texturePath, VkImage& textureImage, 
-                              VkDeviceMemory& textureImageMemory, VkImageView& textureImageView);
+        /*void createTextureFromFile(const std::string& texturePath, VkImage& textureImage, 
+                              VkDeviceMemory& textureImageMemory, VkImageView& textureImageView);*/
         //VkSampler createTextureSampler();
 
         //void createDepthResources(VkExtent2D extent, VkImage& depthImage, 
@@ -72,6 +75,7 @@ class TextureManager{
 
 		void setCurrentLayout(VkImageLayout layout) const { vkImageLayout_ = layout; }
         
+		uint8_t* getImageData() const { return (uint8_t*)img_; }
 		VkDeviceMemory getVkMemory() const { return vkMemory_[0]; }
         VkImage getVkImage() const { return vkImage_; }
 		VkImageView getVkImageView() const { return imageView_; }
@@ -99,7 +103,8 @@ class TextureManager{
         VkFormat findDepthFormat();
         VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
         bool hasStencilComponent(VkFormat format);*/
-
+        int w_, h_, comp_;
+        const uint8_t* img_ = nullptr;
 		VulkanDevice* vulkanDevice_;
         VkImage vkImage_ = VK_NULL_HANDLE;
         VkImageUsageFlags vkUsageFlags_ = 0;

@@ -48,10 +48,8 @@ StagingDevice::MemoryRegionDesc StagingDevice::getNextFreeOffset(uint32_t size)
         stagingBufferSize_ > requestedAlignedSize ?
         stagingBufferSize_ - requestedAlignedSize : 0;
     if (unusedSize) {
-        const uint32_t unusedOffset =
-            stagingBufferSize_ - unusedSize;
-        regions_.push_front({
-            unusedOffset, unusedSize, SubmitHandle() });
+        const uint32_t unusedOffset = stagingBufferSize_ - unusedSize;
+        regions_.push_front({unusedOffset, unusedSize, SubmitHandle() });
     }
     return {
         .offset_ = 0,
@@ -83,11 +81,9 @@ void StagingDevice::bufferSubData(
 
     while (size) {
         MemoryRegionDesc desc = getNextFreeOffset((uint32_t)size);
-        const uint32_t chunkSize =
-            std::min((uint32_t)size, desc.size_);
+        const uint32_t chunkSize = std::min((uint32_t)size, desc.size_);
         stagingBuffer->bufferSubData(eng_, desc.offset_, chunkSize, data);
-        const CommandBufferWrapper& wrapper =
-            eng_.commandManager_->acquire();
+        const CommandBufferWrapper& wrapper = eng_.commandManager_->acquire();
         const VkBufferCopy copy = {
           .srcOffset = desc.offset_,
           .dstOffset = dstOffset,

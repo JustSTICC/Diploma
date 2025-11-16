@@ -61,65 +61,60 @@ void BufferManager::createBuffer(const BufferDesc& requestedDesc,
     if (!useStaging && (desc.storage == StorageType_Device)) {
         desc.storage = StorageType_HostVisible;
     }
-    if (desc.usage & BufferUsageBits_Index) {
-        vkUsageFlags_ |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-    }
-    if (desc.usage & BufferUsageBits_Vertex) {
-        vkUsageFlags_ |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    }
-    if (desc.usage & BufferUsageBits_Uniform) {
-        vkUsageFlags_ |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT |
-            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-    }
-    if (desc.usage & BufferUsageBits_Storage) {
-        vkUsageFlags_ |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-    }
-    if (desc.usage & BufferUsageBits_Indirect) {
-        vkUsageFlags_ |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT |
-            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-    }
+
+    // Map engine usage to VkBufferUsageFlags
+    vkUsageFlags_ = 0;
+    if (desc.usage & BufferUsageBits_Index)   vkUsageFlags_ |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    if (desc.usage & BufferUsageBits_Vertex)  vkUsageFlags_ |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    if (desc.usage & BufferUsageBits_Uniform) vkUsageFlags_ |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    if (desc.usage & BufferUsageBits_Storage) vkUsageFlags_ |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    if (desc.usage & BufferUsageBits_Indirect)vkUsageFlags_ |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+
     const VkMemoryPropertyFlags memFlags = storageTypeToVkMemoryPropertyFlags(desc.storage);
-    Result result;
-	bufferSize_ = desc.size;
     vkMemFlags_ = memFlags;
-	const VkBufferCreateInfo bufferInfo{
-	.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-	.flags = 0,
-	.size = bufferSize_,
-	.usage = vkUsageFlags_,
-	.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-	.queueFamilyIndexCount = 0,
-	.pQueueFamilyIndices = nullptr
+    bufferSize_ = desc.size;
+
+    // Ensure copy usage flags are set correctly for staging/device-local paths
+    if (useStaging) {
+        if (memFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+            vkUsageFlags_ |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT; // staging buffer
+        } else {
+            vkUsageFlags_ |= VK_BUFFER_USAGE_TRANSFER_DST_BIT; // device-local upload target
+        }
+    }
+
+    const VkBufferCreateInfo bufferInfo{
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .flags = 0,
+        .size = bufferSize_,
+        .usage = vkUsageFlags_,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = nullptr
     };
 
-    vkCreateBuffer(device, &bufferInfo, nullptr, &vkBuffer_);
-    VkMemoryRequirements requirements = {};
+    VkResult res = vkCreateBuffer(device, &bufferInfo, nullptr, &vkBuffer_);
+    ASSERT_VK_RESULT(res, "vkCreateBuffer failed");
+
+    VkMemoryRequirements requirements{};
     vkGetBufferMemoryRequirements(device, vkBuffer_, &requirements);
-    if (requirements.memoryTypeBits &
-        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
-        isCoherentMemory_ = true;
-    }
-    VkMemoryRequirements2 requirements2 = {
+
+    // Correctly derive coherence from requested memory properties, not memoryTypeBits
+    isCoherentMemory_ = (memFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0;
+
+    VkMemoryRequirements2 requirements2{
         .sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2,
         .pNext = nullptr,
-		.memoryRequirements = requirements
+        .memoryRequirements = requirements
     };
-    allocateMemory(phyDevice,
-        device,
-        &requirements2 ,
-        memFlags,
-        &vkMemory_);
+    allocateMemory(phyDevice, device, &requirements2, memFlags, &vkMemory_);
     vkBindBufferMemory(device, vkBuffer_, vkMemory_, 0);
 
     if (memFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-        vkMapMemory(device, vkMemory_, 0, bufferSize_, 0, &mappedPtr_);
+        res = vkMapMemory(device, vkMemory_, 0, bufferSize_, 0, &mappedPtr_);
+        ASSERT_VK_RESULT(res, "vkMapMemory failed");
     }
 
-    /* if (desc.data) {
-         upload(handle, desc.data, desc.size, 0);
-     }*/
     Result::setResult(outResult, Result());
 }
 
@@ -154,9 +149,8 @@ void BufferManager::getBufferSubData(
     memcpy(data, (const uint8_t*)mappedPtr_ + offset, size);
 }
 
-void BufferManager::bufferSubData(const VulkanEngine& ctx, size_t offset, size_t size, const void* data) {
-    // only host-visible buffers can be uploaded this way
-    VK_ASSERT(mappedPtr_);
+void BufferManager::bufferSubData(const VulkanEngine& eng, size_t offset, size_t size, const void* data) {
+    // only host-visible buffers can be uploaded this way    VK_ASSERT(mappedPtr_);
 
     if (!mappedPtr_) {
         return;
@@ -172,7 +166,7 @@ void BufferManager::bufferSubData(const VulkanEngine& ctx, size_t offset, size_t
     }
 
     if (!isCoherentMemory_) {
-        flushMappedMemory(ctx, offset, size);
+        flushMappedMemory(eng, offset, size);
     }
 }
 

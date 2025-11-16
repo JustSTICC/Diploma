@@ -2,6 +2,7 @@ d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vc143.
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vc143.idb
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkangraphicspipeline.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\pipelinebuilder.obj
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\commandmanager.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\commandbuffer.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\logger.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\descriptormanager.obj
@@ -25,9 +26,19 @@ d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\syncut
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\guimanager.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\shader.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\texturemanager.obj
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\stagingdevice.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\buffermanager.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkanswapchain.obj
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkangraphicspipelinev2.obj
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkanengine.obj
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.exe
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.pdb
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.ilk
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\cl.command.1.tlog
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\cl.items.tlog
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\cl.read.1.tlog
 d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\cl.write.1.tlog
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\link.command.1.tlog
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\link.read.1.tlog
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\link.secondary.1.tlog
+d:\tu\diploma\diploma\vulkan_engine\vulkan_engine\vulkan_engine\x64\debug\vulkan_engine.tlog\link.write.1.tlog

@@ -70,9 +70,13 @@ void TextureManager::createTexture(const TextureDesc& requestedDesc,
     const char* debugName,
     Result* outResult) {
 
+
     TextureDesc desc(requestedDesc);
     if (debugName && *debugName) {
         desc.debugName = debugName;
+    }
+    if (desc.dataPath) {
+        desc.data = loadFromFile(desc.dataPath);      
     }
     const VkFormat vkFormat =
         isDepthOrStencilFormat(desc.format) ?
@@ -449,6 +453,14 @@ VkImageView TextureManager::getOrCreateVkImageViewForFramebuffer(VulkanEngine& e
 
     return imageViewForFramebuffer_[level][layer];
 }
+
+const void* TextureManager::loadFromFile(const char* imagePath) {
+
+    return stbi_load("data/wood.jpg", &w_, &h_, &comp_, 4);
+}
+void TextureManager::releseImgData() {
+    stbi_image_free((void*)img_);
+}
 //
 //void TextureManager::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, 
 //                    VkImageUsageFlags usage, VkMemoryPropertyFlags properties, 
@@ -600,15 +612,15 @@ VkImageView TextureManager::getOrCreateVkImageViewForFramebuffer(VulkanEngine& e
 //    commandManager->endSingleTimeCommands(commandBuffer);
 //}
 
-void TextureManager::createTextureFromFile(const std::string& texturePath, VkImage& textureImage, 
-                              VkDeviceMemory& textureImageMemory, VkImageView& textureImageView){
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
-
-    if (!pixels) {
-        throw std::runtime_error("failed to load texture image!");
-    }
+//void TextureManager::createTextureFromFile(const std::string& texturePath, VkImage& textureImage, 
+//                              VkDeviceMemory& textureImageMemory, VkImageView& textureImageView){
+//    int texWidth, texHeight, texChannels;
+//    stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+//    VkDeviceSize imageSize = texWidth * texHeight * 4;
+//
+//    if (!pixels) {
+//        throw std::runtime_error("failed to load texture image!");
+//    }
     /*uint32_t numMipLevels = 1;
 
     while ((texWidth | texHeight) >> numMipLevels) {
@@ -689,7 +701,7 @@ void TextureManager::createTextureFromFile(const std::string& texturePath, VkIma
     vkFreeMemory(vulkanDevice->getLogicalDevice(), stagingBufferMemory, nullptr);
 
     textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);*/
-}
+//}
 
 /*VkSampler TextureManager::createTextureSampler(){
     VkSamplerCreateInfo samplerInfo{};

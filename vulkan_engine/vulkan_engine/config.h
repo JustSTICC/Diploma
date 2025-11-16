@@ -12,6 +12,7 @@ struct Config {
     std::string windowTitle = "G.L. Engine";
     uint32_t maxFramesInFlight = NULL;
     bool enableValidation = true;
+	bool enableHeadlessSurface = false;
     bool enableGui = false;
     std::string fontPath = "../assets/fonts/Roboto-Regular.ttf";
     float fontSize = 16.0f;

@@ -38,6 +38,8 @@ private:
     VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
     bool enableValidationLayers;
 
+
+
 	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 
     const std::vector<const char*> validationLayers = {

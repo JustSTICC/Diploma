@@ -10,7 +10,8 @@ class VulkanDevice;
 
 class VulkanSwapchain{
     public:
-        VulkanSwapchain();
+        VulkanSwapchain() = default;
+        VulkanSwapchain(const VulkanEngine* eng);
         ~VulkanSwapchain();
 
         void initialize(const VulkanDevice& device, VkSurfaceKHR surface, GLFWwindow* window);
@@ -29,6 +30,7 @@ class VulkanSwapchain{
         const std::vector<VkImageView>& getImageViews() const { return swapChainImageViews; }
 		uint64_t getCurrentFrameIndex() const { return currentFrameIndex_; }
 		uint32_t getNumSwapchainImages() const { return numSwapchainImages_; }
+        TextureHandle getCurrentTexture();
 
     private:
 
@@ -46,6 +48,7 @@ class VulkanSwapchain{
         VkFence presentFence_[VK_MAX_SWAPCHAIN_IMAGES] = {};
         uint64_t timelineWaitValues_[VK_MAX_SWAPCHAIN_IMAGES] = {};
 
+		const VulkanEngine* eng_;
         const VulkanDevice* vulkanDevice = nullptr;
         VkSurfaceKHR surface = VK_NULL_HANDLE;
 

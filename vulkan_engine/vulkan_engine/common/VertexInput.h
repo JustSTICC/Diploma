@@ -22,7 +22,7 @@ public:
         while (n < VK_VERTEX_ATTRIBUTES_MAX && attributes[n].format != VK_FORMAT_UNDEFINED) {
             n++;
         }
-        return n;
+		return n;
     }
 
     uint32_t getNumInputBindings() const {

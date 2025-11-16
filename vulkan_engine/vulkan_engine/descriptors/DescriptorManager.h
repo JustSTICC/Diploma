@@ -12,7 +12,7 @@ class DescriptorManager {
         DescriptorManager(VulkanEngine& eng);
         ~DescriptorManager();
 
-  //      void initialize(const VulkanDevice& device);
+        void initialize(uint32_t maxTextures = 16, uint32_t maxSamplers = 16);
         void cleanup();
 
   //      void createDescriptorPool(uint32_t maxFramesInFlight);

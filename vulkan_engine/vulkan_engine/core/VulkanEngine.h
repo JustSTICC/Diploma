@@ -31,6 +31,7 @@ class VulkanEngine : public IVkEngine{
         std::unique_ptr<VulkanDevice> vulkanDevice_;
 		std::vector<DeferredTask> deferredTasks_;
         CommandBuffer* currentCommandBuffer_;
+        VkSemaphore timelineSemaphore_ = VK_NULL_HANDLE;
 
         ICommandBuffer& acquireCommandBuffer() override;
 
@@ -41,19 +42,20 @@ class VulkanEngine : public IVkEngine{
         void waitDeferredTasks();
         void processDeferredTasks();
 
-        Holder<BufferHandle> createBuffer(const BufferDesc& desc, const char* debugName, Result* outResult) override;
+        Holder<BufferHandle> createBuffer(const BufferDesc& desc, const char* debugName = nullptr, Result* outResult = nullptr) override;
         Holder<SamplerHandle> createSampler(const SamplerStateDesc& desc, Result* outResult) override;
-        Holder<TextureHandle> createTexture(const TextureDesc& desc, const char* debugName, Result* outResult) override;
+        Holder<TextureHandle> createTexture(const TextureDesc& desc, const char* debugName = nullptr, Result* outResult = nullptr) override;
         Holder<TextureHandle> createTextureView(TextureHandle texture,
             const TextureViewDesc& desc,
             const char* debugName,
             Result* outResult) override;
 
-        Holder<RenderPipelineHandle> createRenderPipeline(const PipelineDesc& desc, Result* outResult) override;
+        Holder<RenderPipelineHandle> createRenderPipeline(const PipelineDesc& desc, Result* outResult = nullptr) override;
         Holder<ShaderModuleHandle> createShaderModule(const char* filename) override;
         Holder<QueryPoolHandle> createQueryPool(uint32_t numQueries, const char* debugName, Result* outResult) override;
 
         VkPipeline getVkPipeline(RenderPipelineHandle handle, uint32_t viewMask);
+        TextureHandle getCurrentSwapchainTexture();
 
         void checkAndUpdateDescriptorSets();
         void bindDefaultDescriptorSets(VkCommandBuffer cmdBuf, VkPipelineBindPoint bindPoint, VkPipelineLayout layout) const;
@@ -64,7 +66,7 @@ class VulkanEngine : public IVkEngine{
         uint64_t gpuAddress(BufferHandle handle, size_t offset = 0) const override;
         void flushMappedMemory(BufferHandle handle, size_t offset, size_t size) const override;
 
-        Result upload(TextureHandle handle, const TextureRangeDesc& range, const void* data, uint32_t bufferRowLength) override;
+        Result upload(TextureHandle handle, const TextureRangeDesc& range, const void* data, uint32_t bufferRowLength = 0) override;
         void generateMipmap(TextureHandle handle) const;
 
         void destroy(RenderPipelineHandle handle) override;
@@ -78,19 +80,26 @@ class VulkanEngine : public IVkEngine{
         void run();
 
     protected:
+        virtual void drawFrame() = 0;
         virtual void initializeResources() {}
-        virtual void updateUniforms(uint32_t currentImage) {}
-        virtual void recordRenderCommands(VkCommandBuffer commnadBuffer, uint32_t imageIndex) {}
-        virtual void renderGui() {}
-        virtual void onCleanup() {} 
-        virtual void draw() {}
+        //virtual void updateUniforms(uint32_t currentImage) {}
+        //virtual void recordRenderCommands(VkCommandBuffer commnadBuffer, uint32_t imageIndex) {}
+        //virtual void renderGui() {}
+        //virtual void onCleanup() {} 
+        //virtual void draw() {}
 
         GLFWwindow* window_;
         VkSurfaceKHR surface_;
 
+		Holder<ShaderModuleHandle> vertShader_;
+		Holder<ShaderModuleHandle> fragShader_;
+		Holder<RenderPipelineHandle> vulkanPipeline_;
+		Holder<BufferHandle> buffer_;
+		Holder<TextureHandle> texture_;
+
         std::unique_ptr<VulkanInstance> vulkanInstance_;
-		std::unique_ptr<Shader> vertShader_;
-        std::unique_ptr<Shader> fragShader_;
+		//std::unique_ptr<Shader> vertShader_;
+  //      std::unique_ptr<Shader> fragShader_;
         std::unique_ptr<VulkanSwapchain> vulkanSwapchain_;
         //std::unique_ptr<VulkanGraphicsPipeline> vulkanPipeline_;
         /*std::unique_ptr<BufferManager> bufferManager_;
@@ -99,7 +108,6 @@ class VulkanEngine : public IVkEngine{
         std::unique_ptr<GuiManager> guiManager_;
         std::unique_ptr<StagingDevice> stagingDevice_;
 
-        VkSemaphore timelineSemaphore_ = VK_NULL_HANDLE;
         std::vector<VkSemaphore> imageAvailableSemaphores_;
         std::vector<VkSemaphore> renderFinishedSemaphores_;
         std::vector<VkFence> inFlightFences_;
@@ -116,7 +124,7 @@ class VulkanEngine : public IVkEngine{
         void initWindow();
         void initVulkan();
         void mainLoop();
-        void drawFrame();
+        //void drawFrame();
         void cleanup();
         void recreateSwapChain();
         void createSyncObjects();

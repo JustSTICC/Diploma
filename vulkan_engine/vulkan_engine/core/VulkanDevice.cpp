@@ -62,6 +62,16 @@ void VulkanDevice::pickPhysicalDevice(){
 }
 
 void VulkanDevice::createLogicalDevice(){
+    std::vector<VkExtensionProperties> allDeviceExtensions;
+    getDeviceExtensionProps(
+        physicalDevice_, allDeviceExtensions);
+    if (validator.isValidationEnabled()) {
+        for (const char* layer : validator.getValidationLayers())
+            getDeviceExtensionProps(
+                physicalDevice_, allDeviceExtensions, layer);
+    }
+    vkGetPhysicalDeviceFeatures2(physicalDevice_, &vkFeatures10_);
+    vkGetPhysicalDeviceProperties2(physicalDevice_, &vkPhysicalDeviceProperties2_);
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice_);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -127,6 +137,14 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) {
         std::cout << "Swapchain adequate for the device - " << swapChainAdequate << std::endl;
     }
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
+}
+
+void VulkanDevice::getDeviceExtensionProps(VkPhysicalDevice dev, std::vector<VkExtensionProperties>& props, const char* validationLayer) {
+    uint32_t numExtensions = 0;
+    vkEnumerateDeviceExtensionProperties(dev, validationLayer, &numExtensions, nullptr);
+    std::vector<VkExtensionProperties> p(numExtensions);
+    vkEnumerateDeviceExtensionProperties(dev, validationLayer, &numExtensions, p.data());
+    props.insert(props.end(), p.begin(), p.end());
 }
 
 bool VulkanDevice::checkDeviceExtensionSupport(VkPhysicalDevice device){

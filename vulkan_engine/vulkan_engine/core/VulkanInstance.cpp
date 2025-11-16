@@ -4,12 +4,14 @@
 #include <stdexcept>
 #include <cstring>
 #include "../Logger.h"
+#include "../utils/Utils.h"
 
 #ifndef VK_DEBUG
     const bool ENABLE_VALIDATION_LAYERS = false;
 #else
     const bool ENABLE_VALIDATION_LAYERS = true;
 #endif
+
 
 VulkanInstance::VulkanInstance(){
 }
@@ -44,26 +46,66 @@ void VulkanInstance::createInstance(){
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Vulkan Diploma Project";
-    appInfo.applicationVersion = VK_API_VERSION_1_4;
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "G.I. Engine";
-    appInfo.engineVersion = VK_API_VERSION_1_4;
-    appInfo.apiVersion = VK_API_VERSION_1_4;
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_3;
+
+    auto extensions = getRequiredExtensions();
+
+    VkValidationFeatureEnableEXT validationFeaturesEnabled[] = {
+        VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+        VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
+    };
+    const VkValidationFeaturesEXT features = {
+      .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+      .enabledValidationFeatureCount = validator.isValidationEnabled() ?
+        (uint32_t)VK_UTILS_GET_ARRAY_SIZE(validationFeaturesEnabled) : 0u,
+      .pEnabledValidationFeatures = isValidationEnabled() ?
+        validationFeaturesEnabled : nullptr,
+    };
+    VkBool32 gpuav_descriptor_checks = VK_FALSE;
+    VkBool32 gpuav_indirect_draws_buffers = VK_FALSE;
+    VkBool32 gpuav_post_process_descriptor_indexing = VK_FALSE;
+#define LAYER_SETTINGS_BOOL32(name, var)              \
+    VkLayerSettingEXT {                                 \
+        .pLayerName = validator.getValidationLayers()[0],        \
+        .pSettingName = name,                             \
+        .type = VK_LAYER_SETTING_TYPE_BOOL32_EXT,         \
+        .valueCount = 1,                                  \
+        .pValues = var }
+    const VkLayerSettingEXT settings[] = {
+        LAYER_SETTINGS_BOOL32("gpuav_descriptor_checks",
+        &gpuav_descriptor_checks),
+        LAYER_SETTINGS_BOOL32("gpuav_indirect_draws_buffers",
+        &gpuav_indirect_draws_buffers),
+        LAYER_SETTINGS_BOOL32(
+        "gpuav_post_process_descriptor_indexing",
+        &gpuav_post_process_descriptor_indexing),
+    };
+#undef LAYER_SETTINGS_BOOL32
+    const VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT,
+        .pNext = validator.isValidationEnabled() ? &features : nullptr,
+        .settingCount = (uint32_t)VK_UTILS_GET_ARRAY_SIZE(settings),
+        .pSettings = settings
+    };
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pNext = &layerSettingsCreateInfo;
     createInfo.pApplicationInfo = &appInfo;
-
-    if (validator.isValidationEnabled()) {
-        validator.setUtilMessenger(&createInfo);
-    } else {
-        createInfo.enabledLayerCount = 0;
-        createInfo.pNext = nullptr;
-    }
-
-    auto extensions = getRequiredExtensions();
     createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
+
+    if (validator.isValidationEnabled()) {
+        validator.setUtilMessenger(&createInfo);
+    }
+    else {
+        createInfo.enabledLayerCount = 0;
+        createInfo.pNext = nullptr;
+    }
 
     VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
     if(result != VK_SUCCESS){
@@ -72,6 +114,8 @@ void VulkanInstance::createInstance(){
     }else {
         std::cout << "Vulkan instance created successfully - " << result << std::endl;
     }
+    //CreateDebugUtilsMessengerEXT(&instance);
+
 }
 
 //void VulkanInstance::setupDebugMessenger(){
@@ -114,9 +158,9 @@ std::vector<const char*> VulkanInstance::getRequiredExtensions(){
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     if (validator.isValidationEnabled()) {
-        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        extensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
     }
 
     extensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);

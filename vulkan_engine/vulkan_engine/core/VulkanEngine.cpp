@@ -96,6 +96,8 @@ void VulkanEngine::initVulkan(){
     vulkanSwapchain_ = std::make_unique<VulkanSwapchain>();
     vulkanSwapchain_->initialize(*vulkanDevice_, surface_, window_);
 
+
+
     //vertShader_ = std::make_unique<Shader>();
     //vertShader_->initialize(vulkanDevice_->getLogicalDevice(), VERTEX_SHADER_PATH);
 
@@ -112,14 +114,20 @@ void VulkanEngine::initVulkan(){
     commandManager_ = std::make_unique<CommandManager>();
     commandManager_->initialize(*vulkanDevice_);
 
+	vertShader_ = createShaderModule(VERTEX_SHADER_PATH);
+	fragShader_ = createShaderModule(FRAGMENT_SHADER_PATH);
+
     //bufferManager_ = std::make_unique<BufferManager>();
     //bufferManager_->(*vulkanDevice_, *commandManager_);
 
     //textureManager_ = std::make_unique<TextureManager>();
     //textureManager_->initialize(*vulkanDevice_, *commandManager_, *bufferManager_);
 
-    //descriptorManager_ = std::make_unique<DescriptorManager>();
-    //descriptorManager_->initialize(*vulkanDevice_);
+    descriptorManager_ = std::make_unique<DescriptorManager>(*this);
+    descriptorManager_->initialize();
+
+    stagingDevice_ = std::make_unique<StagingDevice>(*this);
+
 
     // Initialize GUI if enabled
     //if (config_.enableGui) {
@@ -133,7 +141,7 @@ void VulkanEngine::initVulkan(){
     //                           vulkanPipeline_->getRenderPass());
     //}
 
-    createSyncObjects();
+    //createSyncObjects();
 
     initializeResources();
 }
@@ -166,73 +174,73 @@ void VulkanEngine::mainLoop() {
     }
     vkDeviceWaitIdle(vulkanDevice_->getLogicalDevice());
 }
-
-void VulkanEngine::drawFrame() {
-    vkWaitForFences(vulkanDevice_->getLogicalDevice(), 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
-    vkResetFences(vulkanDevice_->getLogicalDevice(), 1, &inFlightFences_[currentFrame_]);
-
-    uint32_t imageIndex{ 0 };
-    VkResult acquireNextImageResult = 
-        vkAcquireNextImageKHR(vulkanDevice_->getLogicalDevice(), vulkanSwapchain_->getSwapChain(), UINT64_MAX, imageAvailableSemaphores_[currentFrame_], VK_NULL_HANDLE, &imageIndex);
-    if (acquireNextImageResult == VK_ERROR_OUT_OF_DATE_KHR) {
-        recreateSwapChain();
-        return;
-    } else if (acquireNextImageResult != VK_SUCCESS && acquireNextImageResult != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("failed to acquire swap chain image!");
-    }
-    vkResetFences(vulkanDevice_->getLogicalDevice(), 1, &inFlightFences_[currentFrame_]);
-
-    updateUniforms(currentFrame_);
-
-    // Start GUI frame if enabled
-    if (config_.enableGui && guiManager_) {
-        guiManager_->newFrame();
-        renderGui();  // Call derived class GUI rendering
-    }
-
-    // Record command buffer - delegate to derived class
-    recordRenderCommands(commandManager_->getCommandBuffer(currentFrame_), imageIndex);
-
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores_[currentFrame_]};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.commandBufferCount = 1;
-    VkCommandBuffer currentCommandBuffer = commandManager_->getCommandBuffer(currentFrame_);
-    submitInfo.pCommandBuffers = &currentCommandBuffer;
-
-    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores_[currentFrame_]};
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
-
-    VkResult result = vkQueueSubmit(vulkanDevice_->getGraphicsQueue(), 1, &submitInfo, inFlightFences_[currentFrame_]);
-	ASSERT_VK_RESULT(result, "failed to submit draw command buffer!");
-
-    VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
-    VkSwapchainKHR swapChains[] = {vulkanSwapchain_->getSwapChain()};
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
-    presentInfo.pImageIndices = &imageIndex;
-    presentInfo.pResults = nullptr;
-
-    VkResult queuePresentResult = vkQueuePresentKHR(vulkanDevice_->getPresentQueue(), &presentInfo);
-    if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR || queuePresentResult == VK_SUBOPTIMAL_KHR || framebufferResized_) {
-        framebufferResized_ = false;
-        recreateSwapChain();
-    } else if (queuePresentResult != VK_SUCCESS) {
-        throw std::runtime_error("failed to present swap chain image!");
-    }
-
-    currentFrame_ = (currentFrame_ + 1) % config_.maxFramesInFlight;
-}
+//
+//void VulkanEngine::drawFrame() {
+//    vkWaitForFences(vulkanDevice_->getLogicalDevice(), 1, &inFlightFences_[currentFrame_], VK_TRUE, UINT64_MAX);
+//    vkResetFences(vulkanDevice_->getLogicalDevice(), 1, &inFlightFences_[currentFrame_]);
+//
+//    uint32_t imageIndex{ 0 };
+//    VkResult acquireNextImageResult = 
+//        vkAcquireNextImageKHR(vulkanDevice_->getLogicalDevice(), vulkanSwapchain_->getSwapChain(), UINT64_MAX, imageAvailableSemaphores_[currentFrame_], VK_NULL_HANDLE, &imageIndex);
+//    if (acquireNextImageResult == VK_ERROR_OUT_OF_DATE_KHR) {
+//        recreateSwapChain();
+//        return;
+//    } else if (acquireNextImageResult != VK_SUCCESS && acquireNextImageResult != VK_SUBOPTIMAL_KHR) {
+//        throw std::runtime_error("failed to acquire swap chain image!");
+//    }
+//    vkResetFences(vulkanDevice_->getLogicalDevice(), 1, &inFlightFences_[currentFrame_]);
+//
+//    updateUniforms(currentFrame_);
+//
+//    // Start GUI frame if enabled
+//    if (config_.enableGui && guiManager_) {
+//        guiManager_->newFrame();
+//        renderGui();  // Call derived class GUI rendering
+//    }
+//
+//    // Record command buffer - delegate to derived class
+//    recordRenderCommands(commandManager_->getCommandBuffer(currentFrame_), imageIndex);
+//
+//
+//    VkSubmitInfo submitInfo{};
+//    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+//
+//    VkSemaphore waitSemaphores[] = {imageAvailableSemaphores_[currentFrame_]};
+//    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+//    submitInfo.waitSemaphoreCount = 1;
+//    submitInfo.pWaitSemaphores = waitSemaphores;
+//    submitInfo.pWaitDstStageMask = waitStages;
+//    submitInfo.commandBufferCount = 1;
+//    VkCommandBuffer currentCommandBuffer = commandManager_->getCommandBuffer(currentFrame_);
+//    submitInfo.pCommandBuffers = &currentCommandBuffer;
+//
+//    VkSemaphore signalSemaphores[] = {renderFinishedSemaphores_[currentFrame_]};
+//    submitInfo.signalSemaphoreCount = 1;
+//    submitInfo.pSignalSemaphores = signalSemaphores;
+//
+//    VkResult result = vkQueueSubmit(vulkanDevice_->getGraphicsQueue(), 1, &submitInfo, inFlightFences_[currentFrame_]);
+//	ASSERT_VK_RESULT(result, "failed to submit draw command buffer!");
+//
+//    VkPresentInfoKHR presentInfo{};
+//    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+//    presentInfo.waitSemaphoreCount = 1;
+//    presentInfo.pWaitSemaphores = signalSemaphores;
+//    VkSwapchainKHR swapChains[] = {vulkanSwapchain_->getSwapChain()};
+//    presentInfo.swapchainCount = 1;
+//    presentInfo.pSwapchains = swapChains;
+//    presentInfo.pImageIndices = &imageIndex;
+//    presentInfo.pResults = nullptr;
+//
+//    VkResult queuePresentResult = vkQueuePresentKHR(vulkanDevice_->getPresentQueue(), &presentInfo);
+//    if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR || queuePresentResult == VK_SUBOPTIMAL_KHR || framebufferResized_) {
+//        framebufferResized_ = false;
+//        recreateSwapChain();
+//    } else if (queuePresentResult != VK_SUCCESS) {
+//        throw std::runtime_error("failed to present swap chain image!");
+//    }
+//
+//    currentFrame_ = (currentFrame_ + 1) % config_.maxFramesInFlight;
+//}
 
 void VulkanEngine::recreateSwapChain() {
     int width = 0, height = 0;
@@ -251,7 +259,7 @@ void VulkanEngine::cleanup() {
         vkDeviceWaitIdle(vulkanDevice_->getLogicalDevice());
     }
 
-    onCleanup();
+    //onCleanup();
 
     // Cleanup GUI
     if (guiManager_) {
@@ -394,15 +402,17 @@ Holder<TextureHandle> VulkanEngine::createTexture(const TextureDesc& desc, const
 
     TextureManager textureManager = TextureManager(vulkanDevice_.get());
     textureManager.createTexture(desc, debugName, outResult);
+
 	TextureHandle handle = texturesPool_.create(std::move(textureManager));
     awaitingCreation_ = true;
     if (desc.data) {
-       /* const uint32_t numLayers = desc.type==TextureType_Cube ? 6:1;
-        upload(handle, {.dimensions   = desc.dimensions,
-                        .numLayers    = numLayers,
-                        .numMipLevels = desc.dataNumMipLevels},
-                         desc.data);
-        if (desc.generateMipmaps) this->generateMipmap(handle);*/
+        const uint32_t numLayers = desc.type==TextureType_Cube ? 6:1;
+        TextureRangeDesc range = { 0 };
+        upload(handle, { .dimensions = desc.dimensions,
+                    .numLayers = numLayers,
+                    .numMipLevels = desc.dataNumMipLevels },
+                    desc.data);
+        if (desc.generateMipmaps) this->generateMipmap(handle);
     }
     return { this, handle };
 }
@@ -419,6 +429,7 @@ Holder<TextureHandle> VulkanEngine::createTextureView(TextureHandle texture,
 
     // make a copy and make it non-owning
     TextureManager tex = *texturesPool_.get(texture);
+
 	tex.createTextureView(desc, debugName, outResult);
     TextureHandle handle = texturesPool_.create(std::move(tex));
 
@@ -557,6 +568,24 @@ SubmitHandle VulkanEngine::submit(ICommandBuffer& commandBuffer, TextureHandle p
     currentCommandBuffer_ = {};
 
     return handle;
+}
+
+TextureHandle VulkanEngine::getCurrentSwapchainTexture() {
+
+    if (!hasSwapchain()) {
+        return {};
+    }
+
+    TextureHandle tex = vulkanSwapchain_->getCurrentTexture();
+
+    if (!VK_VERIFY(tex.valid())) {
+        VK_ASSERT_MSG(false, "Swapchain has no valid texture");
+        return {};
+    }
+
+    VK_ASSERT_MSG(texturesPool_.get(tex)->getCurrentLayout() != VK_FORMAT_UNDEFINED, "Invalid image format");
+
+    return tex;
 }
 
 uint8_t* VulkanEngine::getMappedPtr(BufferHandle handle) const {

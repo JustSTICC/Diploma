@@ -251,6 +251,7 @@ struct TextureDesc {
     StorageType_e storage = StorageType_Device;
     VkComponentMapping swizzle = {};
     const void* data = nullptr;
+	const char* dataPath = nullptr; // path to image file to load data from
     uint32_t dataNumMipLevels = 1; // how many mip-levels we want to upload
     bool generateMipmaps = false; // generate mip-levels immediately, valid only with non-null data
     const char* debugName = "";

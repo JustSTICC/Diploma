@@ -35,7 +35,12 @@ struct UniformBufferObject {
 class Application : public VulkanEngine {
 
 private:
-    std::vector<StandardVertex> vertices_;
+    Holder<RenderPipelineHandle> vulkanPipeline_;
+    Holder<TextureHandle> texture_;
+    Holder<BufferHandle> vert_;
+    Holder<BufferHandle> index_;
+
+    std::vector<glm::vec3> vertices_;
     std::vector<uint32_t> indices_;
     VkBuffer vertexBuffer_;
     VkDeviceMemory vertexBufferMemory_;
@@ -64,13 +69,15 @@ private:
 
 public:
     Application(const Config& config) : VulkanEngine(config) {}
+    void drawFrame() override;
 protected:
-    void renderGui() override;
+    //void renderGui() override;
     void initializeResources() override;
-    void updateUniforms(uint32_t currentImage) override;
-    void recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) override;
-    void onCleanup() override;
-	void draw() override;
+
+    //void updateUniforms(uint32_t currentImage) override;
+    //void recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) override;
+    //void onCleanup() override;
+	//void draw() override;
 private:
     void loadModel();
     void createFramebuffers();

@@ -1,58 +1,109 @@
 #include "Application.h"
+
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+
 #include <tiny_obj_loader.h>
-void Application::renderGui() {
-    if (show_transform_window) {
-        ImGui::Begin("Model Transform Controls", &show_transform_window);
 
-        ImGui::Text("Control the mesh transformation:");
-        ImGui::Separator();
 
-        // Position controls
-        ImGui::Text("Position:");
-        ImGui::SliderFloat("X Position", &modelPosition.x, -5.0f, 5.0f, "%.2f");
-        ImGui::SliderFloat("Y Position", &modelPosition.y, -5.0f, 5.0f, "%.2f");
-        ImGui::SliderFloat("Z Position", &modelPosition.z, -5.0f, 5.0f, "%.2f");
+#include <stb_image.h>
+#include <stb_image_resize2.h>
 
-        ImGui::Separator();
 
-        // Rotation controls (in degrees)
-        ImGui::Text("Rotation (degrees):");
-        ImGui::SliderFloat("X Rotation", &modelRotation.x, -180.0f, 180.0f, "%.1f°");
-        ImGui::SliderFloat("Y Rotation", &modelRotation.y, -180.0f, 180.0f, "%.1f°");
-        ImGui::SliderFloat("Z Rotation", &modelRotation.z, -180.0f, 180.0f, "%.1f°");
-
-        ImGui::Separator();
-
-        // Scale controls
-        ImGui::Text("Scale:");
-        ImGui::SliderFloat("X Scale", &modelScale.x, 0.1f, 3.0f, "%.2f");
-        ImGui::SliderFloat("Y Scale", &modelScale.y, 0.1f, 3.0f, "%.2f");
-        ImGui::SliderFloat("Z Scale", &modelScale.z, 0.1f, 3.0f, "%.2f");
-
-        // Uniform scale option
-        static bool uniform_scale = false;
-        ImGui::Checkbox("Uniform Scale", &uniform_scale);
-        if (uniform_scale) {
-            static float uniform_scale_value = 1.0f;
-            if (ImGui::SliderFloat("Scale Value", &uniform_scale_value, 0.1f, 3.0f, "%.2f")) {
-                modelScale = glm::vec3(uniform_scale_value);
-            }
-        }
-
-        ImGui::Separator();
-
-        // Reset button
-        if (ImGui::Button("Reset Transform")) {
-            modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-            modelRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-            modelScale = glm::vec3(1.0f, 1.0f, 1.0f);
-        }
-
-        ImGui::End();
-    }
-}
+//void Application::renderGui() {
+//    if (show_transform_window) {
+//        ImGui::Begin("Model Transform Controls", &show_transform_window);
+//
+//        ImGui::Text("Control the mesh transformation:");
+//        ImGui::Separator();
+//
+//        // Position controls
+//        ImGui::Text("Position:");
+//        ImGui::SliderFloat("X Position", &modelPosition.x, -5.0f, 5.0f, "%.2f");
+//        ImGui::SliderFloat("Y Position", &modelPosition.y, -5.0f, 5.0f, "%.2f");
+//        ImGui::SliderFloat("Z Position", &modelPosition.z, -5.0f, 5.0f, "%.2f");
+//
+//        ImGui::Separator();
+//
+//        // Rotation controls (in degrees)
+//        ImGui::Text("Rotation (degrees):");
+//        ImGui::SliderFloat("X Rotation", &modelRotation.x, -180.0f, 180.0f, "%.1f°");
+//        ImGui::SliderFloat("Y Rotation", &modelRotation.y, -180.0f, 180.0f, "%.1f°");
+//        ImGui::SliderFloat("Z Rotation", &modelRotation.z, -180.0f, 180.0f, "%.1f°");
+//
+//        ImGui::Separator();
+//
+//        // Scale controls
+//        ImGui::Text("Scale:");
+//        ImGui::SliderFloat("X Scale", &modelScale.x, 0.1f, 3.0f, "%.2f");
+//        ImGui::SliderFloat("Y Scale", &modelScale.y, 0.1f, 3.0f, "%.2f");
+//        ImGui::SliderFloat("Z Scale", &modelScale.z, 0.1f, 3.0f, "%.2f");
+//
+//        // Uniform scale option
+//        static bool uniform_scale = false;
+//        ImGui::Checkbox("Uniform Scale", &uniform_scale);
+//        if (uniform_scale) {
+//            static float uniform_scale_value = 1.0f;
+//            if (ImGui::SliderFloat("Scale Value", &uniform_scale_value, 0.1f, 3.0f, "%.2f")) {
+//                modelScale = glm::vec3(uniform_scale_value);
+//            }
+//        }
+//
+//        ImGui::Separator();
+//
+//        // Reset button
+//        if (ImGui::Button("Reset Transform")) {
+//            modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+//            modelRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+//            modelScale = glm::vec3(1.0f, 1.0f, 1.0f);
+//        }
+//
+//        ImGui::End();
+//    }
+//}
 
 void Application::initializeResources() {
+
+
+    int w, h, comp;
+    const uint8_t* pixels = stbi_load(TEXTURE_PATH, &w, &h, &comp, STBI_rgb_alpha);
+    assert(pixels);
+
+    loadModel();
+
+    vert_ = createBuffer(
+        { .usage = BufferUsageBits_Vertex,
+          .storage = StorageType_Device,
+          .size = sizeof(glm::vec3) * vertices_.size(),
+          .data = vertices_.data(),
+          .debugName = "Buffer: vertex" });
+    index_ = createBuffer(
+        { .usage = BufferUsageBits_Index,
+          .storage = StorageType_Device,
+          .size = sizeof(uint32_t) * indices_.size(),
+          .data = indices_.data(),
+          .debugName = "Buffer: index" });
+
+    texture_ = createTexture({
+        .type = TextureType_2D,
+        .format = Format_Z_F32,
+        .dimensions = {(uint32_t)w, (uint32_t)h},
+        .usage = TextureUsageBits_Attachment,
+        .debugName = "Depth buffer",
+        });
+
+    const VertexInput vdesc = {
+    .attributes = { {.location = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 0 } },
+    .inputBindings = { {.stride = sizeof(glm::vec3) } },
+    };
+
+    vulkanPipeline_ = createRenderPipeline({
+    .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+    .smVert = vertShader_,
+    .smFrag = fragShader_,
+    .color = {{.format = vulkanSwapchain_->getImageFormat() }},
+    .cullMode = VK_CULL_MODE_BACK_BIT
+        });
    /* textureManager_->createDepthResources(vulkanSwapchain_->getExtent(), depthImage_, depthImageMemory_, depthImageView_);
     createFramebuffers();
     textureManager_->createTextureFromFile(TEXTURE_PATH, textureImage_, textureImageMemory_, textureImageView_);
@@ -73,75 +124,75 @@ void Application::initializeResources() {
         descriptorSets_);*/
 }
 
-void Application::updateUniforms(uint32_t currentImage){
-    UniformBufferObject ubo{};
-
-    glm::mat4 translation = glm::translate(glm::mat4(1.0f), modelPosition);
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    rotation = glm::rotate(rotation, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    rotation = glm::rotate(rotation, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 scaling = glm::scale(glm::mat4(1.0f), modelScale);
-
-    ubo.model = translation * rotation * scaling;
-
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), vulkanSwapchain_->getExtent().width / (float)vulkanSwapchain_->getExtent().height, 0.1f, 10.0f);
-    ubo.proj[1][1] *= -1;
-
-    memcpy(uniformBuffersMapped_[currentImage], &ubo, sizeof(ubo));
-}
-
-void Application::recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-    commandManager_->resetCommandBuffer(currentFrame_);
-    /*commandManager_->recordCommandBuffer(
-        commandBuffer,
-        imageIndex,
-        vulkanPipeline_->getRenderPass(),
-        swapChainFramebuffers_[imageIndex],
-        vulkanSwapchain_->getExtent(),
-        vulkanPipeline_->getGraphicsPipeline(),
-        vulkanPipeline_->getPipelineLayout(),
-        vertexBuffer_,
-        indexBuffer_,
-        descriptorSets_,
-        currentFrame_,
-        static_cast<uint32_t>(indices_.size())
-    );*/
-
-    // Render GUI if enabled (still within the render pass)
-    if (config_.enableGui && guiManager_) {
-        //guiManager_->render(commandBuffer, vulkanPipeline_->getGraphicsPipeline());
-    }
-
-    // End render pass and command buffer
-    vkCmdEndRenderPass(commandBuffer);
-
-    VkResult result = vkEndCommandBuffer(commandBuffer);
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error("Failed to end command buffer recording!");
-    }
-}
-
-void Application::onCleanup() {
-    /*textureManager_->destroyImageView(depthImageView_);
-    textureManager_->destroyImage(depthImage_, depthImageMemory_);
-
-    for (auto framebuffer : swapChainFramebuffers_) {
-        vkDestroyFramebuffer(vulkanDevice_->getLogicalDevice(), framebuffer, nullptr);
-    }
-
-    textureManager_->destroySampler(textureSampler_);
-    textureManager_->destroyImageView(textureImageView_);
-    textureManager_->destroyImage(textureImage_, textureImageMemory_);
-
-    bufferManager_->destroyBuffer(indexBuffer_, indexBufferMemory_);
-    bufferManager_->destroyBuffer(vertexBuffer_, vertexBufferMemory_);
-    for (size_t i = 0; i < config_.maxFramesInFlight; i++) {
-        bufferManager_->destroyBuffer(uniformBuffers_[i], uniformBuffersMemory_[i]);
-    }
-
-    descriptorManager_->destroyDescriptorPool();*/
-}
+//void Application::updateUniforms(uint32_t currentImage){
+//    UniformBufferObject ubo{};
+//
+//    glm::mat4 translation = glm::translate(glm::mat4(1.0f), modelPosition);
+//    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(modelRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+//    rotation = glm::rotate(rotation, glm::radians(modelRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+//    rotation = glm::rotate(rotation, glm::radians(modelRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+//    glm::mat4 scaling = glm::scale(glm::mat4(1.0f), modelScale);
+//
+//    ubo.model = translation * rotation * scaling;
+//
+//    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+//    ubo.proj = glm::perspective(glm::radians(45.0f), vulkanSwapchain_->getExtent().width / (float)vulkanSwapchain_->getExtent().height, 0.1f, 10.0f);
+//    ubo.proj[1][1] *= -1;
+//
+//    memcpy(uniformBuffersMapped_[currentImage], &ubo, sizeof(ubo));
+//}
+//
+//void Application::recordRenderCommands(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+//    commandManager_->resetCommandBuffer(currentFrame_);
+//    /*commandManager_->recordCommandBuffer(
+//        commandBuffer,
+//        imageIndex,
+//        vulkanPipeline_->getRenderPass(),
+//        swapChainFramebuffers_[imageIndex],
+//        vulkanSwapchain_->getExtent(),
+//        vulkanPipeline_->getGraphicsPipeline(),
+//        vulkanPipeline_->getPipelineLayout(),
+//        vertexBuffer_,
+//        indexBuffer_,
+//        descriptorSets_,
+//        currentFrame_,
+//        static_cast<uint32_t>(indices_.size())
+//    );*/
+//
+//    // Render GUI if enabled (still within the render pass)
+//    if (config_.enableGui && guiManager_) {
+//        //guiManager_->render(commandBuffer, vulkanPipeline_->getGraphicsPipeline());
+//    }
+//
+//    // End render pass and command buffer
+//    vkCmdEndRenderPass(commandBuffer);
+//
+//    VkResult result = vkEndCommandBuffer(commandBuffer);
+//    if (result != VK_SUCCESS) {
+//        throw std::runtime_error("Failed to end command buffer recording!");
+//    }
+//}
+//
+//void Application::onCleanup() {
+//    /*textureManager_->destroyImageView(depthImageView_);
+//    textureManager_->destroyImage(depthImage_, depthImageMemory_);
+//
+//    for (auto framebuffer : swapChainFramebuffers_) {
+//        vkDestroyFramebuffer(vulkanDevice_->getLogicalDevice(), framebuffer, nullptr);
+//    }
+//
+//    textureManager_->destroySampler(textureSampler_);
+//    textureManager_->destroyImageView(textureImageView_);
+//    textureManager_->destroyImage(textureImage_, textureImageMemory_);
+//
+//    bufferManager_->destroyBuffer(indexBuffer_, indexBufferMemory_);
+//    bufferManager_->destroyBuffer(vertexBuffer_, vertexBufferMemory_);
+//    for (size_t i = 0; i < config_.maxFramesInFlight; i++) {
+//        bufferManager_->destroyBuffer(uniformBuffers_[i], uniformBuffersMemory_[i]);
+//    }
+//
+//    descriptorManager_->destroyDescriptorPool();*/
+//}
 
 void Application::loadModel() {
     tinyobj::attrib_t attrib;
@@ -153,24 +204,24 @@ void Application::loadModel() {
         throw std::runtime_error(err);
     }
 
-    std::unordered_map<StandardVertex, uint32_t> uniqueVertices{};
+    std::unordered_map<glm::vec3, uint32_t> uniqueVertices{};
 
     for (const auto& shape : shapes) {
         for (const auto& index : shape.mesh.indices) {
-            StandardVertex vertex{};
+            glm::vec3 vertex{};
 
-            vertex.pos = {
+            vertex= {
                 attrib.vertices[3 * index.vertex_index + 0],
                 attrib.vertices[3 * index.vertex_index + 1],
                 attrib.vertices[3 * index.vertex_index + 2]
             };
 
-            vertex.texCoord = {
+            /*vertex.texCoord = {
                 attrib.texcoords[2 * index.texcoord_index + 0],
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
-            vertex.color = { 1.0f, 1.0f, 1.0f };
+            vertex.color = { 1.0f, 1.0f, 1.0f };*/
 
             if (uniqueVertices.count(vertex) == 0) {
                 uniqueVertices[vertex] = static_cast<uint32_t>(vertices_.size());
@@ -212,7 +263,36 @@ void Application::createFramebuffers() {
     }
 }
 
-void Application::draw() {
+void Application::drawFrame() {
+    int width, height;
+    glfwGetFramebufferSize(window_, &width, &height);
+    const float ratio = width / (float)height;
+    const glm::mat4 m = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1, 0, 0));
+    const glm::mat4 v = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -1.5f)), (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::mat4 p = glm::perspective(45.0f, ratio, 0.1f, 1000.0f);
 
+    ICommandBuffer& commandBuffer = acquireCommandBuffer();
+
+    commandBuffer.cmdBeginRendering(
+        { .color = { {.loadOp = LoadOp_Clear, .clearColor = { 1.0f, 1.0f, 1.0f, 1.0f } } } },
+        { .color = { {.texture = getCurrentSwapchainTexture()}} });
+    commandBuffer.cmdPushDebugGroupLabel("Main Render Pass", 0xff0000ff);
+    {
+        commandBuffer.cmdBindVertexBuffer(0, vert_);
+        commandBuffer.cmdBindIndexBuffer(index_, IndexFormat_UI32);
+        commandBuffer.cmdBindRenderPipeline(vulkanPipeline_);
+        commandBuffer.cmdBindDepthState({ .compareOp = VK_COMPARE_OP_LESS, .isDepthWriteEnabled = true });
+        commandBuffer.cmdPushConstants(p * v * m);
+        commandBuffer.cmdDrawIndexed(static_cast<uint32_t>(indices_.size()));
+        commandBuffer.cmdSetDepthBiasEnable(true);
+        commandBuffer.cmdSetDepthBias(0.0f, -1.0f, 0.0f);
+        commandBuffer.cmdDrawIndexed(static_cast<uint32_t>(indices_.size()));
+    }
+    commandBuffer.cmdPopDebugGroupLabel();
+    commandBuffer.cmdEndRendering();
+    submit(commandBuffer, TextureHandle{});
 }
+
+
+
 
